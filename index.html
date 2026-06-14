@@ -18,12 +18,12 @@
             theme: {
                 extend: {
                     colors: {
-                        ntu: {
-                            red: '#9e1d22',     /* 經典台大紅 */
-                            darkred: '#7d1216', /* 深台大紅 */
-                            lightbg: '#fcfcfc', /* 溫慢白 */
-                            graybg: '#f4f4f5',  /* 淺灰 */
-                            border: '#e4e4e7',  /* 邊框灰 */
+                        nscu: {
+                            green: '#1b4332',     /* 經典南十字墨綠 */
+                            darkgreen: '#0f291e', /* 深墨綠 */
+                            lightbg: '#fcfcfc',   /* 溫慢白 */
+                            graybg: '#f4f4f5',    /* 淺灰 */
+                            border: '#e4e4e7',    /* 邊框灰 */
                         }
                     },
                     fontFamily: {
@@ -53,27 +53,35 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+        /* 漸變動畫與平滑懸停 */
+        .book-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .book-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -8px rgba(27, 67, 50, 0.15);
+        }
     </style>
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col">
 
-<!-- 紅底白字頂部 Banner -->
-<header class="bg-ntu-red text-white shadow-md">
-    <div class="max-w-7xl mx-auto px-4 py-6 md:py-8 flex flex-col md:flex-row justify-between items-center gap-4">
+<!-- 墨綠底白字頂部 Banner -->
+<header class="bg-nscu-green text-white shadow-md relative overflow-hidden">
+    <div class="relative max-w-7xl mx-auto px-4 py-6 md:py-8 flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border border-white/20 shadow-inner">
                 <i class="fa-solid fa-book-open text-2xl text-white"></i>
             </div>
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Southern Cross University Library</h1>
-                <p class="text-xs md:text-sm text-red-100/80 font-light mt-0.5 tracking-wider uppercase">
-                    國立南十字大學圖書館 ｜ Dolphin Server
+                <p class="text-xs md:text-sm text-emerald-100/80 font-light mt-0.5 tracking-wider uppercase flex items-center gap-1.5">
+                    國立南十字大學圖書館 <span class="text-white/40">|</span> Dolphin Server 
                 </p>
             </div>
         </div>
-        <!-- 動態連線狀態標籤 -->
-        <div id="connectionStatus" class="flex items-center gap-2 text-xs bg-black/15 px-3 py-1.5 rounded-full border border-white/10">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <!-- 動態連線狀態標籤 (白字顯示) -->
+        <div id="connectionStatus" class="flex items-center gap-2 text-xs bg-black/20 text-white px-3 py-1.5 rounded-full border border-white/10 transition-all font-medium">
+            <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <span id="statusText">系統狀態：遠端資料庫同步連線中</span>
         </div>
     </div>
@@ -104,22 +112,22 @@
             </div>
         </div>
         <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <span class="text-xs font-semibold text-ntu-red uppercase tracking-wider block mb-1">借閱率</span>
+            <span class="text-xs font-semibold text-nscu-green uppercase tracking-wider block mb-1">借閱率</span>
             <div class="flex items-baseline gap-2">
-                <span class="text-3xl font-bold text-ntu-red" id="borrowRate">--</span>
+                <span class="text-3xl font-bold text-nscu-green" id="borrowRate">--</span>
                 <span class="text-xs text-slate-400">百分比</span>
             </div>
         </div>
     </div>
 
-    <!-- 簡約搜尋框風格 -->
+    <!-- 簡約搜尋與過濾區 -->
     <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mb-8">
         <div class="flex flex-col gap-4">
             <!-- 搜尋框 -->
             <div class="relative">
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                <input type="text" id="searchInput" 
-                       class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-ntu-red focus:border-transparent transition-all shadow-inner text-base"
+                <input type="text" id="searchInput" oninput="applyFilters()"
+                       class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-nscu-green focus:border-transparent transition-all shadow-inner text-base"
                        placeholder="請輸入書名、作者、索書號、DS-ISBN進行即時檢索...">
             </div>
             
@@ -129,8 +137,8 @@
                     <label class="text-xs font-medium text-slate-500 flex items-center gap-1.5 pl-1">
                         <i class="fa-solid fa-filter"></i> 學術分類與樓層
                     </label>
-                    <select id="categoryFilter" 
-                            class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-ntu-red cursor-pointer transition-all">
+                    <select id="categoryFilter" onchange="applyFilters()"
+                            class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-nscu-green cursor-pointer transition-all">
                         <option value="ALL">所有學科分類</option>
                     </select>
                 </div>
@@ -138,8 +146,8 @@
                     <label class="text-xs font-medium text-slate-500 flex items-center gap-1.5 pl-1">
                         <i class="fa-solid fa-circle-info"></i> 借閱狀態
                     </label>
-                    <select id="statusFilter" 
-                            class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-ntu-red cursor-pointer transition-all">
+                    <select id="statusFilter" onchange="applyFilters()"
+                            class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-nscu-green cursor-pointer transition-all">
                         <option value="ALL">所有借閱狀態</option>
                         <option value="在架上">在架上</option>
                         <option value="借閱中">借閱中</option>
@@ -151,7 +159,7 @@
         <!-- 搜尋狀態列 -->
         <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
             <span id="searchFeedback">正在載入圖書館藏資料...</span>
-            <button onclick="resetFilters()" class="text-ntu-red hover:text-ntu-darkred font-medium transition-colors flex items-center gap-1">
+            <button onclick="resetFilters()" class="text-nscu-green hover:text-nscu-darkgreen font-medium transition-colors flex items-center gap-1">
                 <i class="fa-solid fa-arrow-rotate-left"></i> 重設所有篩選
             </button>
         </div>
@@ -160,7 +168,7 @@
     <!-- 圖書卡片區 -->
     <div id="booksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div class="col-span-full py-16 flex flex-col items-center justify-center text-slate-400 gap-4">
-            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-ntu-red"></i>
+            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-nscu-green"></i>
             <span class="text-sm font-medium">正在載入資料庫，請稍候...</span>
         </div>
     </div>
@@ -173,19 +181,88 @@
             <a href="#" class="hover:text-white transition-colors">系統指南</a>
             <span>•</span>
             <a href="#" class="hover:text-white transition-colors">紅石自動化對照表</a>
-            <span>•</span>
-            <a href="#" class="hover:text-white transition-colors">管理員登入</a>
         </div>
     </div>
 </footer>
 
+<!-- 複製提示 Toast -->
 <div id="toast" class="fixed bottom-8 right-8 bg-slate-950 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 transition-all duration-300 transform translate-y-24 opacity-0 z-50 text-sm pointer-events-none">
     <i class="fa-solid fa-check-circle text-emerald-400"></i>
     <span id="toastMsg" class="font-medium">複製成功！</span>
 </div>
 
+<!-- 圖書詳細互動 Modal -->
+<div id="bookModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0">
+    <div class="bg-white rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl transform scale-95 transition-all duration-300" id="modalContainer">
+        <!-- 頂部色塊與分類 (改為墨綠色漸變) -->
+        <div class="bg-gradient-to-r from-nscu-green to-nscu-darkgreen text-white p-6 relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-white/70 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <span id="modalCategory" class="text-xs uppercase tracking-widest bg-white/10 px-2.5 py-1 rounded-full border border-white/20">
+                主分類
+            </span>
+            <h2 id="modalTitle" class="text-xl md:text-2xl font-bold mt-3 leading-snug">圖書標題</h2>
+            <p id="modalAuthor" class="text-xs text-emerald-100/80 mt-1">
+                <i class="fa-solid fa-pen-nib"></i> 作者名
+            </p>
+        </div>
+        
+        <!-- 內容區 -->
+        <div class="p-6 space-y-6">
+            <!-- 簡介 -->
+            <div>
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">圖書摘要簡介</h4>
+                <p id="modalDescription" class="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 max-h-40 overflow-y-auto">
+                    這裡會顯示圖書的簡介。
+                </p>
+            </div>
+            
+            <!-- 索書與位置 -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
+                    <span class="text-[10px] text-slate-400 block font-medium uppercase tracking-wider mb-1">索書號碼</span>
+                    <span id="modalBookId" class="text-sm font-mono font-bold text-slate-800">--</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-center">
+                    <span class="text-[10px] text-slate-400 block font-medium uppercase tracking-wider mb-1">狀態</span>
+                    <span id="modalStatus" class="inline-block text-xs px-2.5 py-0.5 rounded-full font-bold">--</span>
+                </div>
+            </div>
+
+            <!-- Minecraft 傳送快取區 -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-cube text-emerald-600"></i> Minecraft 導航與快速傳送
+                </h4>
+                <div class="flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-xs text-slate-600">
+                        <span>館內實際世界座標：</span>
+                        <span id="modalLocationDisplay" class="font-mono font-bold text-slate-800">未標記</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <button onclick="copyCommand('tp')" class="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-2 px-3 rounded-lg transition-colors">
+                            <i class="fa-solid fa-terminal"></i> 複製 /tp 指令
+                        </button>
+                        <button onclick="copyCommand('coords')" class="flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold py-2 px-3 rounded-lg transition-colors">
+                            <i class="fa-regular fa-copy"></i> 複製純座標
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部關閉按鈕 -->
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+            <span id="modalISBN" class="text-xs text-slate-400 font-mono">ISBN: </span>
+            <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg transition-colors">
+                關閉視窗
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // 使用直接匯出 CSV 模式，更為穩固且不易受到發布狀態影響
     const BOOKS_CSV_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vS01kcFvbXs1L6e_V3jInI4VB5pISZMPuz3mxTWUXQWv7Y4la2NbQxWz6i7tZ5czBgdvBI83A4jIwmc/pub?output=csv`;
     const CATEGORIES_CSV_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vS01kcFvbXs1L6e_V3jInI4VB5pISZMPuz3mxTWUXQWv7Y4la2NbQxWz6i7tZ5czBgdvBI83A4jIwmc/pub?output=csv&gid=565039517`;
 
@@ -216,21 +293,18 @@
             categoriesData = normalizeCategories(rawCategories);
             booksData = normalizeBooks(rawBooks);
 
+            updateConnectionStatus(true, "系統狀態：遠端資料庫同步連線成功");
+            
             // 啟動頁面彩現
             buildCategoryFilter();
             calculateStatistics();
-            applyFilters(); // 執行初次過濾彩現
+            applyFilters();
 
         } catch (error) {
-            console.error("無法直接透過 API 獲取雲端資料庫（通常為 Canvas 安全沙盒限制）：", error);
+            console.error("無法直接獲取雲端資料庫（CORS 跨來源安全沙盒限制）：", error);
             
-            // 變更頂部狀態列提示
-            const statusEl = document.getElementById('connectionStatus');
-            const statusText = document.getElementById('statusText');
-            if (statusEl && statusText) {
-                statusEl.className = "flex items-center gap-2 text-xs bg-rose-500/25 text-rose-200 px-3 py-1.5 rounded-full border border-rose-500/30 animate-pulse";
-                statusText.textContent = "系統狀態：遠端資料庫同步失敗";
-            }
+            // 變更頂部狀態列提示（白字高亮、玫瑰紅背景狀態）
+            updateConnectionStatus(false, "系統狀態：遠端資料庫同步失敗 (CORS限制)");
 
             // 在主畫面顯示極為精緻的引導提示，而不使用 Mock Data
             document.getElementById('booksGrid').innerHTML = `
@@ -240,7 +314,7 @@
                     </div>
                     <h3 class="text-lg font-bold text-slate-800">CORS 跨來源連線限制</h3>
                     <p class="text-sm text-slate-600 leading-relaxed">
-                        由於本平台預覽工具的<strong>安全沙盒環境限制</strong>，瀏覽器阻止了向 Google 試算表直接獲取資料（CORS）。這代表網頁在目前的 Canvas 預覽框內無法直接更新。
+                        由於本平台預覽工具的<strong>安全沙盒環境限制</strong>，瀏覽器阻止了向 Google 試算表直接獲取資料（CORS）。這代表網頁在目前的內嵌預覽框內無法直接更新。
                     </p>
                     <div class="w-full text-left bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-500 space-y-2">
                         <p class="font-bold text-slate-700"><i class="fa-solid fa-circle-info text-blue-500 mr-1"></i> 如何讓它正常運作？</p>
@@ -255,6 +329,22 @@
             
             document.getElementById('searchFeedback').innerHTML = `<span class="text-rose-500 font-semibold"><i class="fa-solid fa-triangle-exclamation"></i> 遠端同步受限於瀏覽器沙盒，請下載至本機運行。</span>`;
         }
+    }
+
+    // 更新連線狀態顯示器 (確保無論狀態，字體都是乾淨顯眼的純白字)
+    function updateConnectionStatus(isSuccess, text) {
+        const statusEl = document.getElementById('connectionStatus');
+        const statusText = document.getElementById('statusText');
+        const statusDot = document.getElementById('statusDot');
+        
+        if (isSuccess) {
+            statusEl.className = "flex items-center gap-2 text-xs bg-emerald-600/30 text-white px-3 py-1.5 rounded-full border border-emerald-500/30 transition-all font-medium";
+            statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+        } else {
+            statusEl.className = "flex items-center gap-2 text-xs bg-rose-600/30 text-white px-3 py-1.5 rounded-full border border-rose-500/30 transition-all font-medium animate-pulse";
+            statusDot.className = "w-2.5 h-2.5 rounded-full bg-rose-400";
+        }
+        statusText.textContent = text;
     }
 
     // 中英文欄位適配器：分類表
@@ -286,7 +376,7 @@
         }).filter(book => book.id && book.title);
     }
 
-    // 動態建置分類下拉選單
+    // 獲取分類下拉選單
     function buildCategoryFilter() {
         const filterSelect = document.getElementById('categoryFilter');
         filterSelect.innerHTML = '<option value="ALL">所有學科分類</option>';
@@ -294,7 +384,7 @@
         categoriesData.forEach(cat => {
             if (cat.code && cat.name) {
                 const opt = document.createElement('option');
-                opt.value = cat.name; // 對應 Books 中填寫的「主分類 / category」
+                opt.value = cat.name;
                 opt.textContent = `${cat.code} ${cat.name} (${cat.floor})`;
                 filterSelect.appendChild(opt);
             }
@@ -305,7 +395,6 @@
     function calculateStatistics() {
         const validBooks = booksData.filter(b => b.id && b.title);
         const total = validBooks.length;
-        // 同步相容「在架上」與舊版「在館中」欄位狀態
         const available = validBooks.filter(b => b.status === '在架上' || b.status === '在館中').length;
         const checkedOut = total - available;
         const rate = total > 0 ? ((checkedOut / total) * 100).toFixed(1) + '%' : '0.0%';
@@ -325,9 +414,10 @@
 
         if (validBooks.length === 0) {
             grid.innerHTML = `
-                <div class="col-span-full py-16 text-center text-slate-400 flex flex-col items-center gap-2">
-                    <i class="fa-regular fa-folder-open text-3xl"></i>
-                    <p class="text-sm">查無任何符合條件的圖書。</p>
+                <div class="col-span-full py-20 text-center text-slate-400 flex flex-col items-center gap-4 bg-white rounded-2xl border border-slate-200 p-8">
+                    <i class="fa-regular fa-folder-open text-4xl text-slate-300"></i>
+                    <p class="text-sm font-medium">沒有尋找到符合篩選條件的書籍。</p>
+                    <button onclick="resetFilters()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition-colors font-semibold">重設所有篩選</button>
                 </div>`;
             return;
         }
@@ -335,74 +425,70 @@
         validBooks.forEach(book => {
             const isAvailable = (book.status === '在架上' || book.status === '在館中');
             const statusClass = isAvailable 
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                : 'bg-rose-50 text-rose-700 border-rose-200';
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
+                : 'bg-amber-50 text-amber-700 border-amber-100';
             
-            // 統一對外顯示為玩家定義的「在架上 / 借閱中」
             const displayStatusText = isAvailable ? '在架上' : '借閱中';
-            
             const rawLocation = book.location ? book.location.trim() : '未標記';
             
-            // 處理反斜線座標相容邏輯：
-            // 1. 在畫面顯示：將 `124\-32\14` 轉為更美觀易讀的 `124, -32, 14`
-            // 2. 在複製時：將反斜線替換為空格 `124 -32 14`，便於直接在 MC 中貼上 `/tp 124 -32 14` 指令
+            // 反斜線座標相容
             const displayLocation = rawLocation !== '未標記' ? rawLocation.replace(/\\/g, ', ') : '未標記';
-            const copyLocation = rawLocation !== '未標記' ? rawLocation.replace(/\\/g, ' ') : '未標記';
-            
+
             const card = document.createElement('div');
-            card.className = 'bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between hover:shadow-lg hover:border-slate-300 transition-all duration-200 relative group';
+            card.className = 'book-card bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between cursor-pointer relative group shadow-sm';
+            card.onclick = () => openModal(book);
             
             card.innerHTML = `
                 <div>
-                    <!-- 主分類標籤 -->
+                    <!-- 主分類 -->
                     <div class="flex justify-between items-start gap-4 mb-3">
-                        <span class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full border border-slate-200">
+                        <span class="text-[11px] font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full border border-slate-200/60 max-w-[85%] truncate">
                             ${book.category || '未分類'} ${book.sub_category ? '· ' + book.sub_category : ''}
                         </span>
                         <span class="text-[10px] font-mono text-slate-400 group-hover:text-slate-500 transition-colors">
-                            NSCULIB INDEX
+                            NSCULIB
                         </span>
                     </div>
 
                     <!-- 書名與作者 -->
-                    <h3 class="text-lg font-bold text-slate-900 leading-snug mb-1 group-hover:text-ntu-red transition-colors">
+                    <h3 class="text-base font-bold text-slate-900 leading-snug mb-1 group-hover:text-nscu-green transition-colors duration-150 line-clamp-2">
                         ${book.title}
                     </h3>
-                    <p class="text-sm text-slate-500 mb-4 flex items-center gap-1.5">
-                        <i class="fa-solid fa-pen-nib text-xs"></i> ${book.author || '未知著者'}
+                    <p class="text-xs text-slate-500 mb-4 flex items-center gap-1.5">
+                        <i class="fa-solid fa-pen-nib text-[10px]"></i> ${book.author || '未知著者'}
                     </p>
 
                     <!-- 書籍簡介 -->
-                    <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 rounded-lg p-3 border border-slate-100 mb-4">
-                        ${book.description || '暫無此圖書的詳細簡介，歡迎入館參閱實體書。'}
+                    <p class="text-xs text-slate-600 leading-relaxed bg-slate-50/75 rounded-lg p-3 border border-slate-100/50 mb-4 line-clamp-3">
+                        ${book.description || '暫無此圖書的詳細簡介，歡迎點擊卡片入館參閱實體書庫。'}
                     </p>
                 </div>
 
                 <!-- 底部索引標籤 (點擊複製) -->
                 <div class="pt-3 border-t border-slate-100">
-                    <div class="flex flex-col gap-2 mb-4">
+                    <div class="flex flex-col gap-1.5 mb-3.5">
                         <!-- 索書號 -->
-                        <div onclick="copyValue('${book.id}', '索書號')" 
-                             class="flex items-center justify-between px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg cursor-pointer text-xs font-mono transition-colors"
+                        <div onclick="copyValue('${book.id}', '索書號', event)" 
+                             class="flex items-center justify-between px-3 py-1.5 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-lg text-[11px] font-mono transition-colors"
                              title="點擊一鍵複製索書號">
-                            <span class="text-slate-500 font-sans"><i class="fa-solid fa-barcode mr-1"></i> 索書號</span>
-                            <span class="font-bold text-slate-800">${book.id} <i class="fa-regular fa-copy ml-1 text-slate-400"></i></span>
+                            <span class="text-slate-400 font-sans"><i class="fa-solid fa-barcode mr-1"></i> 索書號</span>
+                            <span class="font-bold text-slate-700 flex items-center gap-1">${book.id} <i class="fa-regular fa-copy text-slate-400"></i></span>
                         </div>
                         <!-- Minecraft 座標 -->
-                        <div onclick="copyValue('${copyLocation}', 'Minecraft 座標')" 
-                             class="flex items-center justify-between px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg cursor-pointer text-xs font-mono transition-colors"
-                             title="一鍵複製指令座標（自動轉為空格，便於 /tp 指令）">
-                            <span class="text-slate-500 font-sans"><i class="fa-solid fa-location-dot mr-1"></i> MC座標</span>
-                            <span class="font-bold text-slate-800">${displayLocation} <i class="fa-regular fa-copy ml-1 text-slate-400"></i></span>
+                        <div onclick="copyValue('${rawLocation.replace(/\\/g, ' ')}', 'Minecraft 座標', event)" 
+                             class="flex items-center justify-between px-3 py-1.5 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-lg text-[11px] font-mono transition-colors"
+                             title="一鍵複製指令座標（自動轉為空格）">
+                            <span class="text-slate-400 font-sans"><i class="fa-solid fa-location-dot mr-1"></i> MC座標</span>
+                            <span class="font-bold text-slate-700 flex items-center gap-1">${displayLocation} <i class="fa-regular fa-copy text-slate-400"></i></span>
                         </div>
                     </div>
 
                     <!-- 借閱狀態與 ISBN -->
                     <div class="flex justify-between items-center text-xs">
-                        <span class="px-2.5 py-1 rounded-full border font-semibold text-[11px] ${statusClass}">
+                        <span class="px-2 py-0.5 rounded-full border font-semibold text-[10px] ${statusClass}">
                             ${displayStatusText}
                         </span>
-                        <span class="text-slate-400 font-mono">
+                        <span class="text-slate-400 font-mono text-[10px]">
                             ${book.isbn ? 'ISBN: ' + book.isbn : ''}
                         </span>
                     </div>
@@ -412,7 +498,7 @@
         });
     }
 
-    // 搜尋與多重過濾邏輯（增加對應「在架上/借閱中」與「在館中/已借出」的交叉過濾能力）
+    // 搜尋與多重過濾邏輯
     function applyFilters() {
         const query = document.getElementById('searchInput').value.toLowerCase().trim();
         const category = document.getElementById('categoryFilter').value;
@@ -421,15 +507,17 @@
         const filtered = booksData.filter(book => {
             if (!book.id || !book.title) return false;
 
+            // 搜尋條件
             const matchesSearch = 
                 book.title.toLowerCase().includes(query) ||
                 (book.author && book.author.toLowerCase().includes(query)) ||
                 book.id.toLowerCase().includes(query) ||
                 (book.isbn && book.isbn.toLowerCase().includes(query));
 
+            // 分類篩選
             const matchesCategory = (category === 'ALL' || book.category === category);
             
-            // 狀態過濾向下相容
+            // 狀態篩選
             let matchesStatus = true;
             if (status !== 'ALL') {
                 if (status === '在架上') {
@@ -448,7 +536,7 @@
 
         // 更新搜尋狀態回饋
         const feedback = document.getElementById('searchFeedback');
-        feedback.innerHTML = `檢索完成：共尋獲 <strong class="text-ntu-red">${filtered.length}</strong> 本相關圖書`;
+        feedback.innerHTML = `檢索完成：共尋獲 <strong class="text-nscu-green">${filtered.length}</strong> 本符合條件之館藏`;
     }
 
     // 重設所有篩選器
@@ -461,7 +549,8 @@
     }
 
     // 複製到剪貼簿功能
-    function copyValue(text, type) {
+    function copyValue(text, type, event) {
+        if (event) event.stopPropagation(); // 阻止卡片點擊事件 (避免點擊複製時卻打開彈窗)
         if (!text || text === '未標記') return;
         
         navigator.clipboard.writeText(text).then(() => {
@@ -474,9 +563,90 @@
             dummy.select();
             document.execCommand("copy");
             document.body.removeChild(dummy);
-            showToast(`${type}已成功複製：${text}`);
+            showToast(`${type}已成功複製！`);
         });
     }
+
+    // --- 互動彈窗 (Modal) 管理器 ---
+    let activeModalBook = null;
+
+    function openModal(book) {
+        activeModalBook = book;
+        
+        const modal = document.getElementById('bookModal');
+        const container = document.getElementById('modalContainer');
+        
+        // 帶入圖書欄位資料
+        document.getElementById('modalCategory').textContent = `${book.category || '未分類'} ${book.sub_category ? ' · ' + book.sub_category : ''}`;
+        document.getElementById('modalTitle').textContent = book.title;
+        document.getElementById('modalAuthor').innerHTML = `<i class="fa-solid fa-pen-nib text-emerald-200"></i> ${book.author || '未知著者'}`;
+        document.getElementById('modalDescription').textContent = book.description || '暫無此圖書的詳細簡介，歡迎前往遊戲內圖書館參閱實體書籍。';
+        document.getElementById('modalBookId').textContent = book.id;
+        document.getElementById('modalISBN').textContent = book.isbn ? `ISBN: ${book.isbn}` : 'ISBN: 暫無登記';
+
+        // 座標格式化
+        const rawLocation = book.location ? book.location.trim() : '未標記';
+        const displayLocation = rawLocation !== '未標記' ? rawLocation.replace(/\\/g, ', ') : '未標記';
+        document.getElementById('modalLocationDisplay').textContent = displayLocation;
+
+        // 狀態標籤渲染
+        const statusEl = document.getElementById('modalStatus');
+        const isAvailable = (book.status === '在架上' || book.status === '在館中');
+        statusEl.textContent = isAvailable ? '在架上' : '借閱中';
+        if (isAvailable) {
+            statusEl.className = "inline-block text-xs px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-bold";
+        } else {
+            statusEl.className = "inline-block text-xs px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-bold";
+        }
+
+        // 開啟動畫
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.add('opacity-100');
+            container.classList.remove('scale-95');
+            container.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('bookModal');
+        const container = document.getElementById('modalContainer');
+        
+        modal.classList.remove('opacity-100');
+        container.classList.remove('scale-100');
+        container.classList.add('scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            activeModalBook = null;
+        }, 300);
+    }
+
+    // Minecraft 專用傳送與指令複製
+    function copyCommand(mode) {
+        if (!activeModalBook || !activeModalBook.location) {
+            showToast("此圖書暫無登錄 Minecraft 座標資料");
+            return;
+        }
+
+        const rawLocation = activeModalBook.location.trim();
+        const spaceCoords = rawLocation.replace(/\\/g, ' ');
+
+        if (mode === 'tp') {
+            const command = `/tp @s ${spaceCoords}`;
+            copyValue(command, 'Minecraft 傳送指令');
+        } else if (mode === 'coords') {
+            copyValue(spaceCoords, '空間世界座標');
+        }
+    }
+
+    // 當點擊 Modal 外部時關閉
+    window.addEventListener('click', (e) => {
+        const modal = document.getElementById('bookModal');
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
 
     // 顯示客製化滑入輕提示 Toast
     function showToast(message) {
