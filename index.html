@@ -65,7 +65,7 @@
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col">
 
-<!-- 墨綠底白字頂部 Banner -->
+<!-- 墨綠底白字頂部 Banner (無斜線乾淨版) -->
 <header class="bg-nscu-green text-white shadow-md relative overflow-hidden">
     <div class="relative max-w-7xl mx-auto px-4 py-6 md:py-8 flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-4">
@@ -128,7 +128,7 @@
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
                 <input type="text" id="searchInput" oninput="applyFilters()"
                        class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-nscu-green focus:border-transparent transition-all shadow-inner text-base"
-                       placeholder="請輸入書名、作者、索書號、DS-ISBN進行即時檢索...">
+                       placeholder="請輸入書名、作者、引入者、索書號、DS-ISBN進行即時檢索...">
             </div>
             
             <!-- 快速分類篩選 -->
@@ -194,7 +194,7 @@
 <!-- 圖書詳細互動 Modal -->
 <div id="bookModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-all duration-300 opacity-0">
     <div class="bg-white rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl transform scale-95 transition-all duration-300" id="modalContainer">
-        <!-- 頂部色塊與分類 (改為墨綠色漸變) -->
+        <!-- 頂部色塊與分類 -->
         <div class="bg-gradient-to-r from-nscu-green to-nscu-darkgreen text-white p-6 relative">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-white/70 hover:text-white text-xl">
                 <i class="fa-solid fa-xmark"></i>
@@ -203,9 +203,9 @@
                 主分類
             </span>
             <h2 id="modalTitle" class="text-xl md:text-2xl font-bold mt-3 leading-snug">圖書標題</h2>
-            <p id="modalAuthor" class="text-xs text-emerald-100/80 mt-1">
-                <i class="fa-solid fa-pen-nib"></i> 作者名
-            </p>
+            <div id="modalAuthor" class="text-xs text-emerald-100/80 mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                <!-- 動態注入作者與引入署名 -->
+            </div>
         </div>
         
         <!-- 內容區 -->
@@ -359,19 +359,20 @@
         }).filter(cat => cat.code && cat.name);
     }
 
-    // 中英文欄位適配器：書籍表
+    // 中英文欄位適配器：書籍表 (升級適配全新結構 索書號|書名|作者|引入|主分類|細部分類|位置|簡介|狀態|DS-ISBN)
     function normalizeBooks(rawList) {
         return rawList.map(row => {
             return {
-                id: (row['id'] || row['索書號'] || '').trim(),
-                title: (row['title'] || row['書名'] || '').trim(),
-                author: (row['author'] || row['作者'] || '').trim(),
-                category: (row['category'] || row['主分類'] || '').trim(),
-                sub_category: (row['sub_category'] || row['細部分類'] || '').trim(),
-                location: (row['location'] || row['位置'] || '').trim(),
-                description: (row['description'] || row['簡介'] || '').trim(),
-                status: (row['status'] || row['狀態'] || '').trim(),
-                isbn: (row['isbn'] || row['DS-ISBN'] || row['ISBN'] || '').trim()
+                id: (row['索書號'] || row['id'] || '').trim(),
+                title: (row['書名'] || row['title'] || '').trim(),
+                author: (row['作者'] || row['author'] || '').trim(),
+                recorder: (row['引入'] || row['recorder'] || '').trim(), // 引入署名欄位
+                category: (row['主分類'] || row['category'] || '').trim(),
+                sub_category: (row['細部分類'] || row['sub_category'] || '').trim(),
+                location: (row['位置'] || row['location'] || '').trim(),
+                description: (row['簡介'] || row['description'] || '').trim(),
+                status: (row['狀態'] || row['status'] || '').trim(),
+                isbn: (row['DS-ISBN'] || row['isbn'] || row['ISBN'] || '').trim()
             };
         }).filter(book => book.id && book.title);
     }
@@ -405,7 +406,7 @@
         document.getElementById('borrowRate').textContent = rate;
     }
 
-    // 彩現書籍卡片
+    // 彩現書籍卡片 (整合引入者署名顯示)
     function renderBooks(data) {
         const grid = document.getElementById('booksGrid');
         grid.innerHTML = '';
@@ -450,13 +451,14 @@
                         </span>
                     </div>
 
-                    <!-- 書名與作者 -->
+                    <!-- 書名與作者/引入署名 -->
                     <h3 class="text-base font-bold text-slate-900 leading-snug mb-1 group-hover:text-nscu-green transition-colors duration-150 line-clamp-2">
                         ${book.title}
                     </h3>
-                    <p class="text-xs text-slate-500 mb-4 flex items-center gap-1.5">
-                        <i class="fa-solid fa-pen-nib text-[10px]"></i> ${book.author || '未知著者'}
-                    </p>
+                    <div class="text-xs text-slate-500 mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span class="flex items-center gap-1"><i class="fa-solid fa-pen-nib text-[10px]"></i> ${book.author || '未知著者'}</span>
+                        ${book.recorder ? `<span class="text-slate-400 flex items-center gap-1" title="遊戲內書籍引入署名"><i class="fa-solid fa-user-pen text-[10px]"></i> 引入: ${book.recorder}</span>` : ''}
+                    </div>
 
                     <!-- 書籍簡介 -->
                     <p class="text-xs text-slate-600 leading-relaxed bg-slate-50/75 rounded-lg p-3 border border-slate-100/50 mb-4 line-clamp-3">
@@ -507,10 +509,11 @@
         const filtered = booksData.filter(book => {
             if (!book.id || !book.title) return false;
 
-            // 搜尋條件
+            // 搜尋條件 (擴充支援引入者檢索)
             const matchesSearch = 
                 book.title.toLowerCase().includes(query) ||
                 (book.author && book.author.toLowerCase().includes(query)) ||
+                (book.recorder && book.recorder.toLowerCase().includes(query)) ||
                 book.id.toLowerCase().includes(query) ||
                 (book.isbn && book.isbn.toLowerCase().includes(query));
 
@@ -579,7 +582,14 @@
         // 帶入圖書欄位資料
         document.getElementById('modalCategory').textContent = `${book.category || '未分類'} ${book.sub_category ? ' · ' + book.sub_category : ''}`;
         document.getElementById('modalTitle').textContent = book.title;
-        document.getElementById('modalAuthor').innerHTML = `<i class="fa-solid fa-pen-nib text-emerald-200"></i> ${book.author || '未知著者'}`;
+        
+        // 動態注入作者與引入署名
+        const authorHTML = `
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-pen-nib text-emerald-300"></i> 著者：${book.author || '未知著者'}</span>
+            ${book.recorder ? `<span class="flex items-center gap-1.5"><i class="fa-solid fa-user-pen text-emerald-300"></i> Minecraft 引入署名：${book.recorder}</span>` : ''}
+        `;
+        document.getElementById('modalAuthor').innerHTML = authorHTML;
+        
         document.getElementById('modalDescription').textContent = book.description || '暫無此圖書的詳細簡介，歡迎前往遊戲內圖書館參閱實體書籍。';
         document.getElementById('modalBookId').textContent = book.id;
         document.getElementById('modalISBN').textContent = book.isbn ? `ISBN: ${book.isbn}` : 'ISBN: 暫無登記';
