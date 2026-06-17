@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNSCU LIB 國立南十字大學圖書館</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts: Inter & Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        nscu: {
+                            50: '#f2f7f4',
+                            100: '#e1ede7',
+                            200: '#c2dacd',
+                            500: '#1b4332', /* 主視覺：深林綠 */
+                            600: '#143225',
+                            700: '#0f251c',
+                            accent: '#d4a373', /* 琥珀金點綴 */
+                            dark: '#081c15'
+                        }
+                    },
+                    boxShadow: {
+                        'nscu-glow': '0 10px 30px -10px rgba(27, 67, 50, 0.15)',
+                        'premium': '0 20px 40px -15px rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #fafbf9;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(27, 67, 50, 0.02) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(212, 163, 115, 0.02) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(241, 245, 249, 1);
+            border-radius: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(27, 67, 50, 0.2);
+            border-radius: 4px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: rgba(27, 67, 50, 0.4);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col font-sans">
+
+    <!-- 導覽列 (Navigation Bar) -->
+    <nav class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo 區域 -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-nscu-500 to-nscu-600 flex items-center justify-center shadow-md">
+                        <i data-lucide="compass" class="w-5 h-5 text-white animate-spin-slow"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="font-black text-xl tracking-wider text-nscu-500 font-serif">DNSCU LIB</span>
+                            <span class="text-[9px] bg-nscu-50 text-nscu-500 border border-nscu-200 px-1.5 py-0.5 rounded font-mono font-bold">主館</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-none mt-0.5">國立南十字大學圖書館</p>
+                    </div>
+                </div>
+
+                <!-- 導覽選單 (與 database.html / booking.html 串接) -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="index.html" class="px-4 py-2 rounded-lg text-sm font-bold text-nscu-500 bg-nscu-50"><i data-lucide="home" class="w-4 h-4 inline mr-1.5"></i>首頁</a>
+                    <a href="database.html" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-nscu-500 hover:bg-slate-50 transition-all"><i data-lucide="search" class="w-4 h-4 inline mr-1.5"></i>館藏檢索</a>
+                    <a href="booking.html" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-nscu-500 hover:bg-slate-50 transition-all"><i data-lucide="calendar" class="w-4 h-4 inline mr-1.5"></i>空間預約</a>
+                </div>
+
+                <!-- 右側：個人化功能 -->
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-nscu-500 hover:bg-nscu-600 border border-nscu-500 px-4 py-2 rounded-xl text-sm font-bold text-white transition-all shadow-md active:scale-95">
+                        <i data-lucide="contact-2" class="w-4 h-4"></i>
+                        <span>虛擬借閱證</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 視覺焦點與背景美化 (Hero Section with Custom Background Image) -->
+    <header class="relative py-20 md:py-32 overflow-hidden bg-cover bg-center" 
+            style="background-image: url('https://raw.githubusercontent.com/Bobkao0527/DNSCU-LIB/main/%E7%B8%BD%E5%9C%96DAY.png');">
+        
+        <!-- 高質感白色毛玻璃/半透明遮罩 (保護內容可讀性) -->
+        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-white/70"></div>
+
+        <!-- 裝飾用南十字星星軌 (呼應天文設計) -->
+        <div class="absolute right-10 top-1/2 -translate-y-1/2 opacity-[0.06] pointer-events-none hidden lg:block">
+            <svg width="450" height="450" viewBox="0 0 400 400" class="text-nscu-500">
+                <circle cx="200" cy="200" r="180" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="8 4"/>
+                <circle cx="200" cy="200" r="120" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="200" cy="200" r="60" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4"/>
+                <path d="M 200 10 L 200 390 M 10 200 L 390 200" stroke="currentColor" stroke-width="0.5" stroke-dasharray="10 10" />
+                <circle cx="200" cy="40" r="6" fill="currentColor"/>
+                <circle cx="200" cy="320" r="8" fill="currentColor"/>
+                <circle cx="80" cy="200" r="5" fill="currentColor"/>
+                <circle cx="310" cy="180" r="7" fill="currentColor"/>
+            </svg>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-left max-w-2xl">
+                <span class="text-xs bg-nscu-50 text-nscu-500 border border-nscu-200 px-3 py-1.5 rounded-full font-bold tracking-widest uppercase mb-4 inline-block">
+                    NATIONAL SOUTHERN CROSS UNIVERSITY
+                </span>
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900 font-serif leading-tight">
+                    探求真理，在星辰之下
+                </h1>
+                <p class="text-base md:text-lg text-slate-600 leading-relaxed mb-8">
+                    提供超越兩百萬冊學術館藏與數位資源，整合智慧化空間管理系統，<br class="hidden md:block">
+                    為全校師生打造卓越、舒適的科研與學習殿堂。
+                </p>
+
+                <!-- 修改後：精簡的快速檢索按鈕 (無輸入欄位) -->
+                <div class="flex flex-col sm:flex-row gap-4 items-start">
+                    <a href="database.html" class="inline-flex items-center justify-center gap-2 bg-nscu-500 hover:bg-nscu-600 text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg active:scale-95 text-base group">
+                        <i data-lucide="search" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                        <span>進入館藏快速檢索</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                    </a>
+                    
+                    <a href="booking.html" class="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold px-8 py-4 rounded-xl transition-all shadow-sm active:scale-95 text-base">
+                        <i data-lucide="calendar" class="w-5 h-5"></i>
+                        <span>預約學習研討空間</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 實時狀態看板 (Dashboard Metrics) -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <!-- 指標 1: 在館人數 -->
+            <div class="bg-white border border-slate-100 p-6 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                <div>
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">即時在館人數</span>
+                    <h3 class="text-3xl font-black mt-1 text-slate-800 flex items-baseline">
+                        <span id="live-in-library">342</span>
+                        <span class="text-xs text-slate-400 ml-1">/ 1,200 人</span>
+                    </h3>
+                    <p class="text-[11px] text-emerald-600 mt-2 flex items-center font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping mr-2"></span>
+                        當前人流適中
+                    </p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-nscu-50 flex items-center justify-center border border-nscu-100 text-nscu-500">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <!-- 指標 2: 自習室餘位 -->
+            <div class="bg-white border border-slate-100 p-6 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                <div>
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">自習座位使用率</span>
+                    <h3 class="text-3xl font-black mt-1 text-slate-800 flex items-baseline">
+                        <span id="live-seat-rate">61.5</span>
+                        <span class="text-xs text-slate-400 ml-1">%</span>
+                    </h3>
+                    <p class="text-[11px] text-nscu-500 mt-2 font-semibold">
+                        餘位 124 席・今日已借出 385 次
+                    </p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-nscu-50 flex items-center justify-center border border-nscu-100 text-nscu-500">
+                    <i data-lucide="armchair" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <!-- 指標 3: 研討室剩餘 -->
+            <div class="bg-white border border-slate-100 p-6 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                <div>
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">多功能研討室</span>
+                    <h3 class="text-3xl font-black mt-1 text-slate-800 flex items-baseline">
+                        <span id="live-room-count">4</span>
+                        <span class="text-xs text-slate-400 ml-1">/ 8 間空閒</span>
+                    </h3>
+                    <p class="text-[11px] text-amber-600 mt-2 font-semibold">
+                        熱門預約時段：14:00 - 18:00
+                    </p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center border border-amber-100 text-amber-600">
+                    <i data-lucide="presentation" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <!-- 指標 4: 開館時間 -->
+            <div class="bg-white border border-slate-100 p-6 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                <div>
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">今日開放時間</span>
+                    <h3 class="text-2xl font-black mt-1 text-slate-800">
+                        08:00 - 22:30
+                    </h3>
+                    <p class="text-[11px] text-slate-500 mt-2 font-medium">
+                        B1/1F 自習室 24H 全天開放
+                    </p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 text-slate-600">
+                    <i data-lucide="clock" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- 兩欄式內容配置 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- 左欄 & 中欄 (占 2 欄寬)：核心系統快速入口與即時狀態 -->
+            <div class="lg:col-span-2 space-y-8">
+                
+                <!-- 空間系統快捷與圖解 -->
+                <section class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
+                    <div class="flex justify-between items-center pb-4 mb-6 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-lg font-bold text-nscu-500 flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-nscu-500"></span>
+                                智慧空間預約指南
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-1">自主學習與小組研究室的極簡預約體驗</p>
+                        </div>
+                        <a href="booking.html" class="px-4 py-2 bg-nscu-50 text-nscu-500 hover:bg-nscu-100 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5">
+                            <span>進入預約系統</span>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                        </a>
+                    </div>
+
+                    <!-- 空間說明 Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-5 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-nscu-200 transition-all">
+                            <div class="w-10 h-10 rounded-lg bg-nscu-50 flex items-center justify-center text-nscu-500 mb-4">
+                                <i data-lucide="armchair" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-sm">個人自習席位 (1F-3F)</h3>
+                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                                全區配備獨立插座、高動態防眩光檯燈，支援現場掃碼即用與 24 小時深夜自習。
+                            </p>
+                        </div>
+                        <div class="p-5 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-nscu-200 transition-all">
+                            <div class="w-10 h-10 rounded-lg bg-nscu-50 flex items-center justify-center text-nscu-500 mb-4">
+                                <i data-lucide="users" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-sm">多人學術研討室 (4F-5F)</h3>
+                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                                提供 4-12 人討論空間，備有 4K 無線投影螢幕、數位白板，適合專題發表與組務討論。
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 最新館內消息 -->
+                <section class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
+                    <div class="flex justify-between items-center pb-4 mb-6 border-b border-slate-100">
+                        <h2 class="text-lg font-bold text-nscu-500 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-nscu-500"></span>
+                            最新消息與服務公告
+                        </h2>
+                        <span class="text-xs text-slate-400 font-medium">2026 暑期運行規程</span>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
+                            <span class="text-[10px] text-nscu-500 font-mono font-bold">2026 / 06 / 15</span>
+                            <h4 class="text-sm font-bold text-slate-800 group-hover:text-nscu-500 transition-colors mt-1">
+                                期末考週 24 小時自習室開放與供電公告
+                            </h4>
+                            <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                                為因應期末考週師生複習需求，本館自習室全區提供定時冷氣、穩定 1Gbps 無線網路，並請讀者留意貴重物品安全保管。
+                            </p>
+                        </div>
+                        <div class="p-4 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group border-t border-slate-50">
+                            <span class="text-[10px] text-nscu-500 font-mono font-bold">2026 / 06 / 10</span>
+                            <h4 class="text-sm font-bold text-slate-800 group-hover:text-nscu-500 transition-colors mt-1">
+                                IEEE Xplore 學術期刊資料庫連線效能升級通知
+                            </h4>
+                            <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                                電子資源中心已完成專屬頻寬對接，校內外查詢 IEEE 論文下載延遲降低 80%，歡迎各位科研人員多加使用。
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 右欄 (占 1 欄寬)：讀者資訊、熱門排行、快速設定 -->
+            <div class="space-y-8">
+                
+                <!-- 讀者快速狀態摘要 -->
+                <div class="bg-gradient-to-br from-nscu-500 to-nscu-700 p-6 rounded-2xl text-white shadow-nscu-glow relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                    
+                    <div class="flex items-center space-x-4 mb-6">
+                        <div class="w-12 h-12 rounded-full border border-white/30 p-1 bg-white/10 flex items-center justify-center">
+                            <span class="font-bold text-lg text-white">林</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-1.5">
+                                <h4 class="font-bold text-white text-base">林建華</h4>
+                                <span class="text-[9px] bg-white/20 text-white border border-white/30 px-1.5 py-0.5 rounded font-mono">系統工程系</span>
+                            </div>
+                            <p class="text-xs text-nscu-100 mt-1">學號: D112098012</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 border-t border-white/10 pt-4 text-center">
+                        <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                            <span class="text-[10px] text-nscu-200 block mb-0.5">當前借閱</span>
+                            <span class="font-bold text-lg text-white" id="my-borrow-count">3</span><span class="text-xs text-nscu-100"> 冊</span>
+                        </div>
+                        <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                            <span class="text-[10px] text-nscu-200 block mb-0.5">預約保留</span>
+                            <span class="font-bold text-lg text-white" id="my-reserve-count">1</span><span class="text-xs text-nscu-100"> 冊</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button onclick="toggleLibraryCard()" class="w-full py-3 bg-white text-nscu-600 hover:bg-slate-100 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                            <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
+                            顯示我的虛擬借閱卡
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 本週熱門學術排行 -->
+                <section class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
+                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                        <h2 class="text-base font-bold text-nscu-500 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-nscu-500"></span>
+                            本週熱門圖書借閱榜
+                        </h2>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 hover:border-nscu-200 transition-all">
+                            <span class="w-6 h-6 rounded-full bg-nscu-100 text-nscu-500 border border-nscu-200 flex items-center justify-center font-bold text-xs shrink-0">1</span>
+                            <div class="min-w-0 flex-1">
+                                <h4 class="text-xs font-bold text-slate-800 truncate">數位網絡安全與攻防實務</h4>
+                                <span class="text-[10px] text-slate-400 block mt-0.5">已借出 128 次・1 冊在庫</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 hover:border-nscu-200 transition-all">
+                            <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0">2</span>
+                            <div class="min-w-0 flex-1">
+                                <h4 class="text-xs font-bold text-slate-800 truncate">系統架構與分散式運算</h4>
+                                <span class="text-[10px] text-slate-400 block mt-0.5">已借出 94 次・0 冊在庫</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 hover:border-nscu-200 transition-all">
+                            <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0">3</span>
+                            <div class="min-w-0 flex-1">
+                                <h4 class="text-xs font-bold text-slate-800 truncate">人工智慧：現代方法 (第四版)</h4>
+                                <span class="text-[10px] text-slate-400 block mt-0.5">已借出 88 次・3 冊在庫</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- 虛擬借閱卡 Drawer Modal (保留功能，供後端串接使用) -->
+    <div id="library-card-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden transition-all duration-300">
+        <div class="bg-white border border-slate-200 w-full max-w-md p-6 rounded-3xl mx-4 shadow-2xl relative transform scale-95 transition-all duration-300" id="card-modal-content">
+            <!-- 關閉按鈕 -->
+            <button onclick="toggleLibraryCard()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- 卡片介面 -->
+            <div class="mb-6">
+                <h3 class="text-lg font-bold text-nscu-500 flex items-center gap-1.5"><i data-lucide="contact-2" class="text-nscu-500"></i>DNSCU 虛擬學生閱覽證</h3>
+                <p class="text-xs text-slate-500 mt-1">於各樓層自助借書機刷此條碼即可輕鬆完成借還手續。</p>
+            </div>
+
+            <!-- 條碼模擬區域 -->
+            <div class="bg-gradient-to-r from-nscu-500 to-nscu-600 p-6 rounded-2xl border border-nscu-100 mb-6 text-center text-white">
+                <span class="text-[9px] text-nscu-100 tracking-widest font-mono uppercase block mb-3 font-semibold">數位校園認證憑證</span>
+                <div class="bg-white p-4 rounded-xl flex flex-col items-center justify-center shadow-inner">
+                    <div class="w-full h-16 bg-white flex items-stretch space-x-0.5 justify-center">
+                        <!-- CSS條碼 -->
+                        <div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div>
+                    </div>
+                    <span class="text-slate-800 text-xs font-mono font-bold tracking-widest mt-2">D112098012</span>
+                </div>
+            </div>
+
+            <!-- 當前借閱明細清單 (為後端串接保留) -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">個人當前借閱清單</h4>
+                <div class="space-y-2 max-h-48 overflow-y-auto scrollbar-thin pr-1" id="my-books-borrowed-container">
+                    <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs">
+                        <div class="min-w-0 flex-1 pr-2">
+                            <p class="font-bold text-slate-700 truncate">系統架構與分散式運算</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">應還日期: 2026/06/20</p>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] bg-amber-50 text-amber-600 border border-amber-100">借閱中</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs">
+                        <div class="min-w-0 flex-1 pr-2">
+                            <p class="font-bold text-slate-700 truncate">DNS與基礎設施安全實務特刊</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">應還日期: 2026/06/29</p>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] bg-amber-50 text-amber-600 border border-amber-100">借閱中</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+                <button onclick="toggleLibraryCard()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors">關閉面板</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 頁尾資訊區 -->
+    <footer class="mt-16 bg-slate-900 text-slate-400 py-12 text-sm border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-nscu-500 flex items-center justify-center">
+                            <i data-lucide="compass" class="w-4 h-4 text-white"></i>
+                        </div>
+                        <span class="font-bold text-white text-base">DNSCU 國立南十字大學圖書館</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-4">
+                        位於南十字大學中心校區。系統採用高擴展性分散式結構，提供不中斷的數位學術資源檢索服務與智慧空間預約引擎。
+                    </p>
+                    <p class="text-[11px] text-slate-600">
+                        &copy; 2026 DNSCU National Southern Cross University Library. All Rights Reserved.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-200 mb-3">開館時間</h4>
+                    <ul class="text-xs space-y-2 text-slate-500">
+                        <li>週一 至 週五: 08:00 - 22:30</li>
+                        <li>週六 至 週日: 09:00 - 22:00</li>
+                        <li>自習空間: B1/1F 24 小時全面開放</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-200 mb-3">系統後端接口建議</h4>
+                    <ul class="text-xs space-y-2 text-slate-500">
+                        <li>資料持久化: <span class="text-nscu-200 font-semibold">可介接 Supabase / Firebase</span></li>
+                        <li>API 回傳狀態: <span class="text-emerald-400 font-semibold">99.98% 可用性</span></li>
+                        <li>系統維護: 圖資與系統整合工程處</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS Core Logic -->
+    <script>
+        // 初始化 Lucide 圖標
+        lucide.createIcons();
+
+        // 虛擬借閱證 Modal 控制
+        function toggleLibraryCard() {
+            const modal = document.getElementById('library-card-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('card-modal-content').classList.remove('scale-95');
+                }, 10);
+            } else {
+                document.getElementById('card-modal-content').classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 150);
+            }
+        }
+
+        // 當前人數模擬飄移（讓首頁感覺更生動真實）
+        function startLiveSimulation() {
+            setInterval(() => {
+                const livePop = document.getElementById('live-in-library');
+                if (livePop) {
+                    const current = parseInt(livePop.innerText);
+                    const drift = Math.floor(Math.random() * 5) - 2; // -2 ~ +2
+                    livePop.innerText = Math.max(150, Math.min(1100, current + drift));
+                }
+            }, 4000);
+        }
+
+        window.onload = function() {
+            startLiveSimulation();
+        }
+    </script>
+</body>
+</html>
