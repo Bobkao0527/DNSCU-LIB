@@ -85,7 +85,7 @@
                     </div>
                 </div>
 
-                <!-- 導覽選單 (與 database.html / booking.html / barb.html 串接) -->
+                <!-- 電腦版導覽選單 (與 database.html / booking.html / barb.html 串接) -->
                 <div class="hidden md:flex items-center space-x-1">
                     <a href="index.html" class="px-4 py-2 rounded-lg text-sm font-bold text-nscu-500 bg-white"><i data-lucide="home" class="w-4 h-4 inline mr-1.5"></i>首頁</a>
                     <a href="database.html" class="px-4 py-2 rounded-lg text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all"><i data-lucide="search" class="w-4 h-4 inline mr-1.5"></i>館藏檢索</a>
@@ -94,12 +94,42 @@
                 </div>
 
                 <!-- 右側：個人化功能 (純白按鈕) -->
-                <div class="flex items-center space-x-3">
+                <div class="hidden md:flex items-center space-x-3">
                     <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-4 py-2 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
                         <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
                         <span>虛擬借閱證</span>
                     </button>
                 </div>
+
+                <!-- 行動裝置按鈕組：借閱證快捷鍵 + 漢堡按鈕 -->
+                <div class="flex items-center md:hidden space-x-2">
+                    <!-- 行動端一鍵開證按鈕 -->
+                    <button onclick="toggleLibraryCard()" class="p-2.5 bg-white text-nscu-500 rounded-xl hover:bg-nscu-50 transition-colors active:scale-95 shadow-md flex items-center justify-center" aria-label="Virtual Library Card">
+                        <i data-lucide="contact-2" class="w-5 h-5"></i>
+                    </button>
+                    <!-- 漢堡菜單開關 -->
+                    <button onclick="toggleMobileMenu()" class="text-white hover:text-nscu-100 p-2.5 rounded-xl hover:bg-nscu-600 transition-colors focus:outline-none flex items-center justify-center" aria-label="Toggle Menu">
+                        <i data-lucide="menu" id="menu-icon" class="w-6 h-6 transition-transform"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 行動端下拉式選單抽屜 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-nscu-600 text-white border-t border-nscu-600/60 overflow-hidden transition-all">
+            <div class="px-4 pt-3 pb-6 space-y-2">
+                <a href="index.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-nscu-500 bg-white">
+                    <i data-lucide="home" class="w-4 h-4"></i>首頁
+                </a>
+                <a href="database.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-700 transition-all">
+                    <i data-lucide="search" class="w-4 h-4"></i>館藏檢索
+                </a>
+                <a href="booking.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-700 transition-all">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>空間預約
+                </a>
+                <a href="barb.html" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-700 transition-all">
+                    <i data-lucide="arrow-left-right" class="w-4 h-4"></i>借還書系統
+                </a>
             </div>
         </div>
     </nav>
@@ -492,6 +522,24 @@
 
         // 儲存拉取下來的公告數據，以便彈出視窗讀取
         let announcementsData = [];
+
+        // 漢堡菜單開關
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('menu-icon');
+            
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.setAttribute('data-lucide', 'x');
+                menuIcon.classList.add('rotate-90');
+            } else {
+                mobileMenu.classList.add('hidden');
+                menuIcon.setAttribute('data-lucide', 'menu');
+                menuIcon.classList.remove('rotate-90');
+            }
+            // 重新載入對應圖示
+            lucide.createIcons();
+        }
 
         // 虛擬借閱證 Modal 控制
         function toggleLibraryCard() {
