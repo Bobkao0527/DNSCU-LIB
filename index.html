@@ -240,14 +240,14 @@
                 </div>
             </div>
 
-            <!-- 指標 4: 開館時間 -->
+            <!-- 指標 4: 開館時間 (對應 Sheet 內動態提取) -->
             <div class="bg-white border border-slate-100 p-6 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-all">
                 <div>
                     <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">今日開放時間</span>
-                    <h3 class="text-2xl font-black mt-1 text-slate-800">
+                    <h3 class="text-2xl font-black mt-1 text-slate-800" id="live-opening-hours">
                         08:00 - 22:30
                     </h3>
-                    <p class="text-[11px] text-slate-500 mt-2 font-medium">
+                    <p class="text-[11px] text-slate-500 mt-2 font-medium" id="live-opening-days">
                         B1/1F 自習室 24H 全天開放
                     </p>
                 </div>
@@ -263,41 +263,32 @@
             <!-- 左欄 & 中欄 (占 2 欄寬)：核心系統快速入口與即時狀態 -->
             <div class="lg:col-span-2 space-y-8">
                 
-                <!-- 空間系統快捷與圖解 -->
+                <!-- 系統使用指南 (對接 Google Sheet Column 5 & 6) -->
                 <section class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
                     <div class="flex justify-between items-center pb-4 mb-6 border-b border-slate-100">
                         <div>
                             <h2 class="text-lg font-bold text-nscu-500 flex items-center gap-2">
                                 <span class="w-2.5 h-2.5 rounded-full bg-nscu-500"></span>
-                                智慧空間預約指南
+                                系統使用指南
                             </h2>
-                            <p class="text-xs text-slate-400 mt-1">自主學習與小組研究室的極簡預約體驗</p>
+                            <p class="text-xs text-slate-400 mt-1">智慧校園與館藏資源檢索一站式引導</p>
                         </div>
-                        <a href="booking.html" class="px-4 py-2 bg-nscu-50 text-nscu-500 hover:bg-nscu-100 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5">
-                            <span>進入預約系統</span>
-                            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                        </a>
                     </div>
 
-                    <!-- 空間說明 Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-5 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-nscu-200 transition-all">
-                            <div class="w-10 h-10 rounded-lg bg-nscu-50 flex items-center justify-center text-nscu-500 mb-4">
-                                <i data-lucide="armchair" class="w-5 h-5"></i>
-                            </div>
-                            <h3 class="font-bold text-slate-800 text-sm">個人自習席位 (1F-3F)</h3>
-                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                                全區配備獨立插座、高動態防眩光檯燈，支援現場掃碼即用與 24 小時深夜自習。
-                            </p>
+                    <!-- 系統使用指南動態容器 -->
+                    <div id="guides-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- 骨架加載動畫 (Skeleton Screen) -->
+                        <div class="animate-pulse space-y-3 p-5 rounded-xl border border-slate-100 bg-slate-50/50">
+                            <div class="w-10 h-10 rounded-lg bg-slate-200"></div>
+                            <div class="h-4 bg-slate-200 rounded w-1/3"></div>
+                            <div class="h-3 bg-slate-200 rounded w-full"></div>
+                            <div class="h-3 bg-slate-200 rounded w-2/3"></div>
                         </div>
-                        <div class="p-5 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-nscu-200 transition-all">
-                            <div class="w-10 h-10 rounded-lg bg-nscu-50 flex items-center justify-center text-nscu-500 mb-4">
-                                <i data-lucide="users" class="w-5 h-5"></i>
-                            </div>
-                            <h3 class="font-bold text-slate-800 text-sm">多人學術研討室 (4F-5F)</h3>
-                            <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                                提供 4-12 人討論空間，備有 4K 無線投影螢幕、數位白板，適合專題發表與組務討論。
-                            </p>
+                        <div class="animate-pulse space-y-3 p-5 rounded-xl border border-slate-100 bg-slate-50/50">
+                            <div class="w-10 h-10 rounded-lg bg-slate-200"></div>
+                            <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+                            <div class="h-3 bg-slate-200 rounded w-full"></div>
+                            <div class="h-3 bg-slate-200 rounded w-5/6"></div>
                         </div>
                     </div>
                 </section>
@@ -494,21 +485,25 @@
                     </p>
                 </div>
 
+                <!-- 開館時間 (由 Google Sheet 動態獲取) -->
                 <div>
                     <h4 class="font-bold text-slate-200 mb-3">開館時間</h4>
-                    <ul class="text-xs space-y-2 text-slate-500">
-                        <li>週一 至 週五: 08:00 - 22:30</li>
-                        <li>週六 至 週日: 09:00 - 22:00</li>
-                        <li>自習空間: B1/1F 24 小時全面開放</li>
+                    <ul id="footer-opening-hours" class="text-xs space-y-2 text-slate-500">
+                        <!-- 骨架屏載入中 -->
+                        <li class="h-3 bg-slate-800 rounded w-2/3 animate-pulse"></li>
+                        <li class="h-3 bg-slate-800 rounded w-1/2 animate-pulse"></li>
+                        <li class="h-3 bg-slate-800 rounded w-3/4 animate-pulse"></li>
                     </ul>
                 </div>
 
+                <!-- 館內快速導覽 -->
                 <div>
-                    <h4 class="font-bold text-slate-200 mb-3">數據來源與後端系統</h4>
+                    <h4 class="font-bold text-slate-200 mb-3">館內快速導覽</h4>
                     <ul class="text-xs space-y-2 text-slate-500">
-                        <li>資料庫結構: <span class="text-nscu-200 font-semibold">Google Sheets (CSV)</span></li>
-                        <li>連線狀態: <span class="text-emerald-400 font-semibold">即時對接</span></li>
-                        <li>整合方式: 非同步 Fetch 異步渲染</li>
+                        <li><a href="index.html" class="hover:text-white transition-colors">系統首頁</a></li>
+                        <li><a href="database.html" class="hover:text-white transition-colors">館藏快速檢索</a></li>
+                        <li><a href="booking.html" class="hover:text-white transition-colors">學習空間預約</a></li>
+                        <li><a href="barb.html" class="hover:text-white transition-colors">自助借還書系統</a></li>
                     </ul>
                 </div>
             </div>
@@ -644,6 +639,8 @@
                 
                 const announcements = [];
                 const hotBooks = [];
+                const guides = [];
+                const openingHours = [];
                 
                 dataRows.forEach(row => {
                     // 解析公告 (欄位0, 欄位1, 欄位2)
@@ -661,6 +658,20 @@
                             borrows: row[4] ? row[4].trim() : "0"
                         });
                     }
+                    // 解析使用指南 (欄位5, 欄位6)
+                    if (row[5] && row[5].trim() !== "" && row[5] !== "指南名稱") {
+                        guides.push({
+                            title: row[5].trim(),
+                            content: row[6] ? row[6].trim() : ""
+                        });
+                    }
+                    // 解析開館日期時間 (欄位7, 欄位8)
+                    if (row[7] && row[7].trim() !== "" && row[7] !== "開館日期") {
+                        openingHours.push({
+                            days: row[7].trim(),
+                            hours: row[8] ? row[8].trim() : ""
+                        });
+                    }
                 });
 
                 announcementsData = announcements;
@@ -669,6 +680,10 @@
                 renderAnnouncements(announcements);
                 // 渲染熱門榜區域
                 renderHotBooks(hotBooks);
+                // 渲染系統使用指南
+                renderGuides(guides);
+                // 渲染開館時間
+                renderOpeningHours(openingHours);
 
             } catch (error) {
                 console.error("無法加載試算表數據，使用預設靜態學術備份資料:", error);
@@ -733,6 +748,123 @@
             container.innerHTML = html;
         }
 
+        function renderGuides(list) {
+            const container = document.getElementById('guides-container');
+            if (list.length === 0) {
+                container.innerHTML = `<div class="col-span-1 md:col-span-2 p-4 text-center text-slate-400 text-xs">目前暫無使用指南</div>`;
+                return;
+            }
+
+            let html = "";
+            list.forEach((item, index) => {
+                const icons = ['book-open', 'compass', 'help-circle', 'shield', 'laptop', 'settings'];
+                const selectedIcon = icons[index % icons.length];
+
+                html += `
+                    <div class="p-5 rounded-xl border border-slate-100 bg-slate-50/50 hover:border-nscu-200 transition-all">
+                        <div class="w-10 h-10 rounded-lg bg-nscu-50 flex items-center justify-center text-nscu-500 mb-4">
+                            <i data-lucide="${selectedIcon}" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-sm">${item.title}</h3>
+                        <p class="text-xs text-slate-500 mt-2 leading-relaxed whitespace-pre-line">
+                            ${item.content}
+                        </p>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // 智慧星期匹配演算法
+        function getTodayOpeningInfo(list) {
+            if (!list || list.length === 0) return null;
+            
+            const now = new Date();
+            const day = now.getDay(); // 0 (週日) ~ 6 (週六)
+            const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
+            const dayFullNames = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+            const dayLongNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+            
+            for (let item of list) {
+                const daysText = item.days.replace(/\s+/g, ''); // 移除空格便於比對
+                
+                // 1. 若設定為 "每日" 或 "每天"
+                if (daysText.includes("每日") || daysText.includes("每天")) {
+                    return item;
+                }
+                
+                // 2. 處理區間匹配：例如 "週一至週五"、"週六至週日"
+                if (daysText.includes("至") || daysText.includes("-") || daysText.includes("~")) {
+                    const parts = daysText.split(/[至\-~]/);
+                    if (parts.length === 2) {
+                        const startDayText = parts[0];
+                        const endDayText = parts[1];
+                        
+                        const getDayIndex = (txt) => {
+                            for (let i = 0; i < 7; i++) {
+                                if (txt.includes(dayFullNames[i]) || txt.includes(dayLongNames[i]) || txt.includes(dayNames[i])) {
+                                    return i;
+                                }
+                            }
+                            return -1;
+                        };
+                        
+                        const startIdx = getDayIndex(startDayText);
+                        const endIdx = getDayIndex(endDayText);
+                        
+                        if (startIdx !== -1 && endIdx !== -1) {
+                            if (startIdx <= endIdx) {
+                                // 一般範圍比對 (例如 1 到 5)
+                                if (day >= startIdx && day <= endIdx) {
+                                    return item;
+                                }
+                            } else {
+                                // 跨週範圍比對 (例如 6 到 0)
+                                if (day >= startIdx || day <= endIdx) {
+                                    return item;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // 3. 單日精確比對
+                if (daysText.includes(dayFullNames[day]) || daysText.includes(dayLongNames[day]) || (daysText.includes(dayNames[day]) && daysText.length === 1)) {
+                    return item;
+                }
+            }
+            return list[0]; // 若比對均不成功，預設返回第一筆
+        }
+
+        function renderOpeningHours(list) {
+            const footerContainer = document.getElementById('footer-opening-hours');
+            const cardHours = document.getElementById('live-opening-hours');
+            const cardDays = document.getElementById('live-opening-days');
+
+            if (list.length > 0) {
+                // 即時指標展示：動態匹配今天對應的時間
+                const todayInfo = getTodayOpeningInfo(list);
+                if (cardHours && cardDays && todayInfo) {
+                    cardHours.innerText = todayInfo.hours;
+                    cardDays.innerText = `今日開放 (${todayInfo.days})`;
+                }
+
+                // 渲染頁尾完整的開館清單
+                let html = "";
+                list.forEach(item => {
+                    html += `<li>${item.days}: ${item.hours}</li>`;
+                });
+                if (footerContainer) {
+                    footerContainer.innerHTML = html;
+                }
+            } else {
+                if (footerContainer) {
+                    footerContainer.innerHTML = `<li class="text-xs text-slate-500">無可用的開放時間資訊</li>`;
+                }
+            }
+        }
+
         // 預防出錯的備用資料
         function renderDefaultData() {
             const defaultAnnouncements = [
@@ -744,9 +876,20 @@
                 { title: "系統架構與分散式運算", borrows: "94" },
                 { title: "人工智慧：現代方法 (第四版)", borrows: "88" }
             ];
+            const defaultGuides = [
+                { title: "個人席位極簡登記", content: "全區自習位皆具備 QR 碼。現場掃碼，即可登記。24H 全天候自習室提供隨時供電。" },
+                { title: "跨校學術資源查閱", content: "持有學生證或本校虛擬閱覽證，皆可進行各校聯盟圖書館之查閱與論文借調下載。" }
+            ];
+            const defaultOpening = [
+                { days: "週一 至 週五", hours: "08:00 - 22:30" },
+                { days: "週六 至 週日", hours: "09:00 - 22:00" }
+            ];
+
             announcementsData = defaultAnnouncements;
             renderAnnouncements(defaultAnnouncements);
             renderHotBooks(defaultHotBooks);
+            renderGuides(defaultGuides);
+            renderOpeningHours(defaultOpening);
         }
 
         window.onload = function() {
