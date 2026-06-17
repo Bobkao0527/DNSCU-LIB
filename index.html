@@ -67,35 +67,36 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col font-sans">
 
-    <!-- 導覽列 (Navigation Bar) -->
-    <nav class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100">
+    <!-- 導覽列 (Navigation Bar) - 深林綠底白字 -->
+    <nav class="sticky top-0 z-40 bg-nscu-500 text-white shadow-md border-b border-nscu-600/50 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <!-- Logo 區域 -->
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-nscu-500 to-nscu-600 flex items-center justify-center shadow-md">
-                        <i data-lucide="compass" class="w-5 h-5 text-white animate-spin-slow"></i>
+                    <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md">
+                        <i data-lucide="compass" class="w-5 h-5 text-nscu-500 animate-spin-slow"></i>
                     </div>
                     <div>
                         <div class="flex items-center space-x-1.5">
-                            <span class="font-black text-xl tracking-wider text-nscu-500 font-serif">DNSCU LIB</span>
-                            <span class="text-[9px] bg-nscu-50 text-nscu-500 border border-nscu-200 px-1.5 py-0.5 rounded font-mono font-bold">主館</span>
+                            <span class="font-black text-xl tracking-wider text-white font-serif">DNSCU LIB</span>
+                            <span class="text-[9px] bg-nscu-600 text-nscu-100 border border-nscu-200/30 px-1.5 py-0.5 rounded font-mono font-bold">主館</span>
                         </div>
-                        <p class="text-[10px] text-slate-500 leading-none mt-0.5">國立南十字大學圖書館</p>
+                        <p class="text-[10px] text-nscu-100/80 leading-none mt-0.5">國立南十字大學圖書館</p>
                     </div>
                 </div>
 
-                <!-- 導覽選單 (與 database.html / booking.html 串接) -->
+                <!-- 導覽選單 (與 database.html / booking.html / barb.html 串接) -->
                 <div class="hidden md:flex items-center space-x-1">
-                    <a href="index.html" class="px-4 py-2 rounded-lg text-sm font-bold text-nscu-500 bg-nscu-50"><i data-lucide="home" class="w-4 h-4 inline mr-1.5"></i>首頁</a>
-                    <a href="database.html" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-nscu-500 hover:bg-slate-50 transition-all"><i data-lucide="search" class="w-4 h-4 inline mr-1.5"></i>館藏檢索</a>
-                    <a href="booking.html" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-nscu-500 hover:bg-slate-50 transition-all"><i data-lucide="calendar" class="w-4 h-4 inline mr-1.5"></i>空間預約</a>
+                    <a href="index.html" class="px-4 py-2 rounded-lg text-sm font-bold text-nscu-500 bg-white"><i data-lucide="home" class="w-4 h-4 inline mr-1.5"></i>首頁</a>
+                    <a href="database.html" class="px-4 py-2 rounded-lg text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all"><i data-lucide="search" class="w-4 h-4 inline mr-1.5"></i>館藏檢索</a>
+                    <a href="booking.html" class="px-4 py-2 rounded-lg text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all"><i data-lucide="calendar" class="w-4 h-4 inline mr-1.5"></i>空間預約</a>
+                    <a href="barb.html" class="px-4 py-2 rounded-lg text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all"><i data-lucide="arrow-left-right" class="w-4 h-4 inline mr-1.5"></i>借還書系統</a>
                 </div>
 
-                <!-- 右側：個人化功能 -->
+                <!-- 右側：個人化功能 (純白按鈕) -->
                 <div class="flex items-center space-x-3">
-                    <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-nscu-500 hover:bg-nscu-600 border border-nscu-500 px-4 py-2 rounded-xl text-sm font-bold text-white transition-all shadow-md active:scale-95">
-                        <i data-lucide="contact-2" class="w-4 h-4"></i>
+                    <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-4 py-2 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
+                        <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
                         <span>虛擬借閱證</span>
                     </button>
                 </div>
@@ -107,11 +108,11 @@
     <header class="relative py-20 md:py-32 overflow-hidden bg-cover bg-center" 
             style="background-image: url('https://raw.githubusercontent.com/Bobkao0527/DNSCU-LIB/main/%E7%B8%BD%E5%9C%96DAY.png');">
         
-        <!-- 高質感白色毛玻璃/半透明遮罩 (保護內容可讀性) -->
-        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-white/70"></div>
+        <!-- 高質感半透明遮罩：左側偏白保證文字可讀，右側淡化提高背景圖清晰度 -->
+        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-white/20"></div>
 
         <!-- 裝飾用南十字星星軌 (呼應天文設計) -->
-        <div class="absolute right-10 top-1/2 -translate-y-1/2 opacity-[0.06] pointer-events-none hidden lg:block">
+        <div class="absolute right-10 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none hidden lg:block">
             <svg width="450" height="450" viewBox="0 0 400 400" class="text-nscu-500">
                 <circle cx="200" cy="200" r="180" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="8 4"/>
                 <circle cx="200" cy="200" r="120" fill="none" stroke="currentColor" stroke-width="1.5"/>
@@ -133,11 +134,11 @@
                     探求真理，在星辰之下
                 </h1>
                 <p class="text-base md:text-lg text-slate-600 leading-relaxed mb-8">
-                    提供超越兩百萬冊學術館藏與數位資源，整合智慧化空間管理系統，<br class="hidden md:block">
-                    為全校師生打造卓越、舒適的科研與學習殿堂。
+                    提供大量學術館藏與數位資源，整合智慧化空間管理系統，<br class="hidden md:block">
+                    為使用者打造開放、自由的遊戲內知識圈
                 </p>
 
-                <!-- 修改後：精簡的快速檢索按鈕 (無輸入欄位) -->
+                <!-- 快速連結按鈕 -->
                 <div class="flex flex-col sm:flex-row gap-4 items-start">
                     <a href="database.html" class="inline-flex items-center justify-center gap-2 bg-nscu-500 hover:bg-nscu-600 text-white font-bold px-8 py-4 rounded-xl transition-all shadow-lg active:scale-95 text-base group">
                         <i data-lucide="search" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
@@ -271,34 +272,30 @@
                     </div>
                 </section>
 
-                <!-- 最新館內消息 -->
+                <!-- 最新消息與服務公告 (資料由 Google Sheet 動態獲取) -->
                 <section class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
                     <div class="flex justify-between items-center pb-4 mb-6 border-b border-slate-100">
                         <h2 class="text-lg font-bold text-nscu-500 flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-nscu-500"></span>
                             最新消息與服務公告
                         </h2>
-                        <span class="text-xs text-slate-400 font-medium">2026 暑期運行規程</span>
+                        <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded font-mono text-[10px]">自動更新</span>
                     </div>
                     
-                    <div class="space-y-4">
-                        <div class="p-4 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group">
-                            <span class="text-[10px] text-nscu-500 font-mono font-bold">2026 / 06 / 15</span>
-                            <h4 class="text-sm font-bold text-slate-800 group-hover:text-nscu-500 transition-colors mt-1">
-                                期末考週 24 小時自習室開放與供電公告
-                            </h4>
-                            <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                                為因應期末考週師生複習需求，本館自習室全區提供定時冷氣、穩定 1Gbps 無線網路，並請讀者留意貴重物品安全保管。
-                            </p>
-                        </div>
-                        <div class="p-4 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group border-t border-slate-50">
-                            <span class="text-[10px] text-nscu-500 font-mono font-bold">2026 / 06 / 10</span>
-                            <h4 class="text-sm font-bold text-slate-800 group-hover:text-nscu-500 transition-colors mt-1">
-                                IEEE Xplore 學術期刊資料庫連線效能升級通知
-                            </h4>
-                            <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                                電子資源中心已完成專屬頻寬對接，校內外查詢 IEEE 論文下載延遲降低 80%，歡迎各位科研人員多加使用。
-                            </p>
+                    <!-- 公告動態容器 -->
+                    <div id="announcement-container" class="space-y-2">
+                        <!-- 骨架加載動畫 (Skeleton Screen) -->
+                        <div class="animate-pulse space-y-4">
+                            <div class="p-4 bg-slate-50 rounded-xl space-y-2">
+                                <div class="h-3 bg-slate-200 rounded w-24"></div>
+                                <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+                                <div class="h-3 bg-slate-200 rounded w-full"></div>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-xl space-y-2">
+                                <div class="h-3 bg-slate-200 rounded w-24"></div>
+                                <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+                                <div class="h-3 bg-slate-200 rounded w-5/6"></div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -343,7 +340,7 @@
                     </div>
                 </div>
 
-                <!-- 本週熱門學術排行 -->
+                <!-- 本週熱門學術排行 (由 Google Sheet 動態獲取) -->
                 <section class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
                     <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
                         <h2 class="text-base font-bold text-nscu-500 flex items-center gap-1.5">
@@ -351,26 +348,17 @@
                             本週熱門圖書借閱榜
                         </h2>
                     </div>
-                    <div class="space-y-3">
-                        <div class="flex items-center space-x-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 hover:border-nscu-200 transition-all">
-                            <span class="w-6 h-6 rounded-full bg-nscu-100 text-nscu-500 border border-nscu-200 flex items-center justify-center font-bold text-xs shrink-0">1</span>
-                            <div class="min-w-0 flex-1">
-                                <h4 class="text-xs font-bold text-slate-800 truncate">數位網絡安全與攻防實務</h4>
-                                <span class="text-[10px] text-slate-400 block mt-0.5">已借出 128 次・1 冊在庫</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 hover:border-nscu-200 transition-all">
-                            <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0">2</span>
-                            <div class="min-w-0 flex-1">
-                                <h4 class="text-xs font-bold text-slate-800 truncate">系統架構與分散式運算</h4>
-                                <span class="text-[10px] text-slate-400 block mt-0.5">已借出 94 次・0 冊在庫</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 hover:border-nscu-200 transition-all">
-                            <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 border border-slate-200 flex items-center justify-center font-bold text-xs shrink-0">3</span>
-                            <div class="min-w-0 flex-1">
-                                <h4 class="text-xs font-bold text-slate-800 truncate">人工智慧：現代方法 (第四版)</h4>
-                                <span class="text-[10px] text-slate-400 block mt-0.5">已借出 88 次・3 冊在庫</span>
+                    
+                    <!-- 熱門圖書動態容器 -->
+                    <div id="hot-books-container" class="space-y-3">
+                        <!-- 骨架加載動畫 -->
+                        <div class="animate-pulse space-y-3">
+                            <div class="flex items-center space-x-3 p-3 bg-slate-50/80 rounded-xl">
+                                <div class="w-6 h-6 bg-slate-200 rounded-full"></div>
+                                <div class="flex-1 space-y-1">
+                                    <div class="h-3 bg-slate-200 rounded w-2/3"></div>
+                                    <div class="h-2.5 bg-slate-200 rounded w-1/3"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -379,7 +367,7 @@
         </div>
     </main>
 
-    <!-- 虛擬借閱卡 Drawer Modal (保留功能，供後端串接使用) -->
+    <!-- 虛擬借閱卡 Drawer Modal -->
     <div id="library-card-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden transition-all duration-300">
         <div class="bg-white border border-slate-200 w-full max-w-md p-6 rounded-3xl mx-4 shadow-2xl relative transform scale-95 transition-all duration-300" id="card-modal-content">
             <!-- 關閉按鈕 -->
@@ -405,7 +393,7 @@
                 </div>
             </div>
 
-            <!-- 當前借閱明細清單 (為後端串接保留) -->
+            <!-- 當前借閱明細清單 -->
             <div class="space-y-3">
                 <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">個人當前借閱清單</h4>
                 <div class="space-y-2 max-h-48 overflow-y-auto scrollbar-thin pr-1" id="my-books-borrowed-container">
@@ -428,6 +416,31 @@
 
             <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
                 <button onclick="toggleLibraryCard()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors">關閉面板</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最新消息詳細資訊 Modal -->
+    <div id="announcement-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden transition-all duration-300">
+        <div class="bg-white border border-slate-200 w-full max-w-xl p-8 rounded-3xl mx-4 shadow-2xl relative transform scale-95 transition-all duration-300" id="announcement-modal-content">
+            <!-- 關閉按鈕 -->
+            <button onclick="toggleAnnouncementModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+
+            <!-- 公告內容 -->
+            <div class="space-y-4">
+                <div class="flex items-center space-x-2">
+                    <span class="px-2.5 py-1 rounded bg-nscu-50 border border-nscu-200 text-nscu-500 font-mono text-xs font-bold" id="modal-announcement-date"></span>
+                    <span class="text-xs text-slate-400">官方公告</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 leading-snug" id="modal-announcement-title"></h3>
+                <div class="border-b border-slate-100 pb-2"></div>
+                <p class="text-slate-600 text-sm leading-relaxed whitespace-pre-wrap" id="modal-announcement-content"></p>
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-slate-100 flex justify-end">
+                <button onclick="toggleAnnouncementModal()" class="px-6 py-2.5 bg-nscu-500 hover:bg-nscu-600 text-white rounded-xl text-xs font-bold transition-colors shadow-md">關閉公告</button>
             </div>
         </div>
     </div>
@@ -461,11 +474,11 @@
                 </div>
 
                 <div>
-                    <h4 class="font-bold text-slate-200 mb-3">系統後端接口建議</h4>
+                    <h4 class="font-bold text-slate-200 mb-3">數據來源與後端系統</h4>
                     <ul class="text-xs space-y-2 text-slate-500">
-                        <li>資料持久化: <span class="text-nscu-200 font-semibold">可介接 Supabase / Firebase</span></li>
-                        <li>API 回傳狀態: <span class="text-emerald-400 font-semibold">99.98% 可用性</span></li>
-                        <li>系統維護: 圖資與系統整合工程處</li>
+                        <li>資料庫結構: <span class="text-nscu-200 font-semibold">Google Sheets (CSV)</span></li>
+                        <li>連線狀態: <span class="text-emerald-400 font-semibold">即時對接</span></li>
+                        <li>整合方式: 非同步 Fetch 異步渲染</li>
                     </ul>
                 </div>
             </div>
@@ -476,6 +489,9 @@
     <script>
         // 初始化 Lucide 圖標
         lucide.createIcons();
+
+        // 儲存拉取下來的公告數據，以便彈出視窗讀取
+        let announcementsData = [];
 
         // 虛擬借閱證 Modal 控制
         function toggleLibraryCard() {
@@ -493,7 +509,35 @@
             }
         }
 
-        // 當前人數模擬飄移（讓首頁感覺更生動真實）
+        // 公告詳情 Modal 控制
+        function toggleAnnouncementModal() {
+            const modal = document.getElementById('announcement-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('announcement-modal-content').classList.remove('scale-95');
+                }, 10);
+            } else {
+                document.getElementById('announcement-modal-content').classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 150);
+            }
+        }
+
+        // 打開指定索引的公告
+        function openAnnouncementDetail(index) {
+            const announcement = announcementsData[index];
+            if (!announcement) return;
+
+            document.getElementById('modal-announcement-date').innerText = announcement.date;
+            document.getElementById('modal-announcement-title').innerText = announcement.title;
+            document.getElementById('modal-announcement-content').innerText = announcement.content || "無詳細內文";
+
+            toggleAnnouncementModal();
+        }
+
+        // 當前人數模擬飄移
         function startLiveSimulation() {
             setInterval(() => {
                 const livePop = document.getElementById('live-in-library');
@@ -505,8 +549,161 @@
             }, 4000);
         }
 
+        // CSV 安全解析函數 (考慮引號與逗號)
+        function parseCSV(text) {
+            let lines = [];
+            let row = [""];
+            let inQuotes = false;
+            
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i];
+                let next = text[i+1];
+                if (c === '"') {
+                    if (inQuotes && next === '"') {
+                        row[row.length - 1] += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (c === ',' && !inQuotes) {
+                    row.push('');
+                } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                    if (c === '\r' && next === '\n') { i++; }
+                    lines.push(row);
+                    row = [''];
+                } else {
+                    row[row.length - 1] += c;
+                }
+            }
+            if (row.length > 1 || row[0] !== '') {
+                lines.push(row);
+            }
+            return lines;
+        }
+
+        // 後端資料拉取與動態渲染
+        async function fetchSheetData() {
+            const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS01kcFvbXs1L6e_V3jInI4VB5pISZMPuz3mxTWUXQWv7Y4la2NbQxWz6i7tZ5czBgdvBI83A4jIwmc/pub?output=csv&gid=248986281";
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("資料拉取失敗");
+                const rawCsv = await response.text();
+                const parsedRows = parseCSV(rawCsv);
+                
+                // 過濾並排除標題列 (Header) 
+                const dataRows = parsedRows.slice(1);
+                
+                const announcements = [];
+                const hotBooks = [];
+                
+                dataRows.forEach(row => {
+                    // 解析公告 (欄位0, 欄位1, 欄位2)
+                    if (row[0] && row[1] && row[0].trim() !== "" && row[0] !== "公告日期") {
+                        announcements.push({
+                            date: row[0].trim(),
+                            title: row[1].trim(),
+                            content: row[2] ? row[2].trim() : ""
+                        });
+                    }
+                    // 解析熱門榜 (欄位3, 欄位4)
+                    if (row[3] && row[3].trim() !== "" && row[3] !== "熱門榜書名") {
+                        hotBooks.push({
+                            title: row[3].trim(),
+                            borrows: row[4] ? row[4].trim() : "0"
+                        });
+                    }
+                });
+
+                announcementsData = announcements;
+
+                // 渲染公告區域
+                renderAnnouncements(announcements);
+                // 渲染熱門榜區域
+                renderHotBooks(hotBooks);
+
+            } catch (error) {
+                console.error("無法加載試算表數據，使用預設靜態學術備份資料:", error);
+                renderDefaultData();
+            }
+        }
+
+        function renderAnnouncements(list) {
+            const container = document.getElementById('announcement-container');
+            if (list.length === 0) {
+                container.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs">目前暫無最新公告</div>`;
+                return;
+            }
+            
+            let html = "";
+            list.forEach((item, index) => {
+                html += `
+                    <div onclick="openAnnouncementDetail(${index})" 
+                         class="p-4 rounded-xl hover:bg-slate-50 transition-all cursor-pointer group border border-transparent hover:border-slate-100 flex items-start space-x-3 text-left">
+                        <div class="mt-1 shrink-0 bg-nscu-50 text-nscu-500 w-8 h-8 rounded-lg flex items-center justify-center group-hover:bg-nscu-500 group-hover:text-white transition-colors">
+                            <i data-lucide="megaphone" class="w-4 h-4"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <span class="text-[10px] text-nscu-500 font-mono font-bold">${item.date}</span>
+                            <h4 class="text-sm font-bold text-slate-800 group-hover:text-nscu-500 transition-colors mt-0.5 truncate">
+                                ${item.title}
+                            </h4>
+                            <p class="text-xs text-slate-400 mt-1 truncate">
+                                ${item.content ? item.content : '點選檢視公告內文'}
+                            </p>
+                        </div>
+                        <div class="self-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-nscu-500"></i>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function renderHotBooks(list) {
+            const container = document.getElementById('hot-books-container');
+            if (list.length === 0) {
+                container.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs">目前暫無借閱排行榜</div>`;
+                return;
+            }
+            
+            let html = "";
+            list.forEach((book, index) => {
+                const rankColor = index === 0 ? 'bg-nscu-100 text-nscu-500 border-nscu-200' : 'bg-slate-100 text-slate-500 border-slate-200';
+                html += `
+                    <div class="flex items-center space-x-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100 hover:border-nscu-200 transition-all">
+                        <span class="w-6 h-6 rounded-full ${rankColor} border flex items-center justify-center font-bold text-xs shrink-0">${index + 1}</span>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-xs font-bold text-slate-800 truncate">${book.title}</h4>
+                            <span class="text-[10px] text-slate-400 block mt-0.5">累計出借 ${book.borrows} 次</span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // 預防出錯的備用資料
+        function renderDefaultData() {
+            const defaultAnnouncements = [
+                { date: "2026 / 06 / 15", title: "期末考週 24 小時自習室開放與供電公告", content: "為因應期末考週師生複習需求，本館自習室全區提供定時冷氣、穩定無線網路。請留意貴重物品保管，並共同維護空間整潔。" },
+                { date: "2026 / 06 / 10", title: "IEEE Xplore 學術期刊資料庫連線效能升級通知", content: "電子資源中心已完成專屬頻寬對接，校內外查詢 IEEE 論文下載延遲降低 80%。" }
+            ];
+            const defaultHotBooks = [
+                { title: "數位網絡安全與攻防實務", borrows: "128" },
+                { title: "系統架構與分散式運算", borrows: "94" },
+                { title: "人工智慧：現代方法 (第四版)", borrows: "88" }
+            ];
+            announcementsData = defaultAnnouncements;
+            renderAnnouncements(defaultAnnouncements);
+            renderHotBooks(defaultHotBooks);
+        }
+
         window.onload = function() {
             startLiveSimulation();
+            fetchSheetData();
         }
     </script>
 </body>
