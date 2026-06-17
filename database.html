@@ -79,10 +79,19 @@
                 </p>
             </div>
         </div>
-        <!-- 動態連線狀態標籤 (白字顯示) -->
-        <div id="connectionStatus" class="flex items-center gap-2 text-xs bg-black/20 text-white px-3 py-1.5 rounded-full border border-white/10 transition-all font-medium">
-            <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span id="statusText">系統狀態：遠端資料庫同步連線中</span>
+        
+        <!-- 頂部右側控制區 (返回按鈕與狀態指示燈) -->
+        <div class="flex flex-wrap items-center gap-3">
+            <!-- 回空間預約系統按鈕 -->
+            <a href="booking.html" class="flex items-center gap-2 text-xs bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-xl border border-white/20 transition-all font-semibold shadow-sm hover:scale-[1.02] active:scale-100">
+                <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                <span>回空間預約系統</span>
+            </a>
+            <!-- 動態連線狀態標籤 (白字顯示、並同步調整為 rounded-xl) -->
+            <div id="connectionStatus" class="flex items-center gap-2 text-xs bg-black/20 text-white px-3 py-1.5 rounded-xl border border-white/10 transition-all font-medium">
+                <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="statusText">系統狀態：遠端資料庫同步連線中</span>
+            </div>
         </div>
     </div>
 </header>
@@ -331,17 +340,17 @@
         }
     }
 
-    // 更新連線狀態顯示器 (確保無論狀態，字體都是乾淨顯眼的純白字)
+    // 更新連線狀態顯示器 (確保無論狀態，字體與形狀都是乾淨顯眼的 rounded-xl)
     function updateConnectionStatus(isSuccess, text) {
         const statusEl = document.getElementById('connectionStatus');
         const statusText = document.getElementById('statusText');
         const statusDot = document.getElementById('statusDot');
         
         if (isSuccess) {
-            statusEl.className = "flex items-center gap-2 text-xs bg-emerald-600/30 text-white px-3 py-1.5 rounded-full border border-emerald-500/30 transition-all font-medium";
+            statusEl.className = "flex items-center gap-2 text-xs bg-emerald-600/30 text-white px-3 py-1.5 rounded-xl border border-emerald-500/30 transition-all font-medium";
             statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
         } else {
-            statusEl.className = "flex items-center gap-2 text-xs bg-rose-600/30 text-white px-3 py-1.5 rounded-full border border-rose-500/30 transition-all font-medium animate-pulse";
+            statusEl.className = "flex items-center gap-2 text-xs bg-rose-600/30 text-white px-3 py-1.5 rounded-xl border border-rose-500/30 transition-all font-medium animate-pulse";
             statusDot.className = "w-2.5 h-2.5 rounded-full bg-rose-400";
         }
         statusText.textContent = text;
@@ -500,6 +509,7 @@
         });
     }
 
+    // 搜尋與多重過濾邏輯
     // 搜尋與多重過濾邏輯
     function applyFilters() {
         const query = document.getElementById('searchInput').value.toLowerCase().trim();
