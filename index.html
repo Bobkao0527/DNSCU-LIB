@@ -1219,7 +1219,7 @@
                 return;
             }
 
-            window.location.href = `${SSO_PORTAL_URL}?redirect=${encodeURIComponent(callbackUrl)}`;
+            window.location.href = `${SSO_PORTAL_URL}?returnUrl=${encodeURIComponent(callbackUrl)}`;
         }
 
         function logout() {
