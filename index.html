@@ -1016,7 +1016,7 @@
                             <label class="block text-[10px] font-bold text-rose-600">⚠️ 結束劃位確認：</label>
                             <input type="text" id="cancelNameInput" readonly class="w-full px-3 py-1.5 bg-slate-100 border border-rose-300 rounded-lg text-xs text-slate-500 font-bold" placeholder="Minecraft ID">
                             <div class="grid grid-cols-2 gap-2 pt-1">
-                                <button onclick="toggleCancelForm(false)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] font-semibold py-1.5 rounded-lg transition-all font-bold">取消</button>
+                                <button onclick="toggleCancelForm(false)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] font-semibold py-1.5 rounded-lg transition-all font-bold font-bold">取消</button>
                                 <button id="cancelSubmitBtn" onclick="confirmCancelRegistration()" class="bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-semibold py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 font-bold">
                                     <span id="cancelSpinner" class="hidden"><i class="fa-solid fa-spinner animate-spin"></i></span>
                                     <span>結束使用</span>
@@ -1107,8 +1107,16 @@
     <!-- ========================================== -->
     <script>
         // ==========================================
-        // 0. SSO 模組設定與驗證邏輯
+        // -------------------------------------------------------------
+        // 請在此填寫您的 Google Apps Script 後端部署網址 (Web App URL)
+        // -------------------------------------------------------------
+        // 1. 處理 9F自習室劃位登記與取消的 Apps Script (對接自習室試算表)
+        const RESERVATION_APPS_SCRIPT_URL = "https://script.google.com/macros/library/d/1080LwYjDlHmDs-kss5M0_tI0uEjUc5Xikg0TKwB8tvgzhJdi8AzzUrr7/1";
+
+        // 2. 處理使用者名稱、借閱碼、借閱書籍的 Apps Script (對接圖書館 User Sheet 試算表)
+        const USER_PROFILE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_5l_-UMO-hWGkhz2trSeAyV5-tS2bkUn8euDSM_aGI1qEZvWHp-lIbdXapcYjdzdE/exec";
         // ==========================================
+
         const AUTH_CENTER_URL = "https://dolphinloginsystem.pages.dev";
         const VERIFY_API_URL = "https://dolphinloginsystem.pages.dev/api/verify";
         
@@ -1177,11 +1185,16 @@
         }
 
         // ==========================================
-        // 0.1 串接 Apps Script 獲取與更新 User Profile
+        // 0.1 串接 Apps Script 獲取與更新 User Profile (只連動 USER_PROFILE_APPS_SCRIPT_URL)
         // ==========================================
         async function fetchUserLibraryProfile(username) {
+            if (USER_PROFILE_APPS_SCRIPT_URL === "YOUR_USER_PROFILE_APPS_SCRIPT_URL_HERE") {
+                console.warn("未配置 USER_PROFILE_APPS_SCRIPT_URL，載入離線臨時模擬用戶檔案");
+                loadFallbackUserProfile(username);
+                return;
+            }
             try {
-                const profileUrl = `${APPS_SCRIPT_URL}?action=getUserProfile&username=${encodeURIComponent(username)}`;
+                const profileUrl = `${USER_PROFILE_APPS_SCRIPT_URL}?action=getUserProfile&username=${encodeURIComponent(username)}`;
                 const response = await fetch(profileUrl);
                 
                 if (response.ok) {
@@ -1215,17 +1228,25 @@
                     }
                 }
             } catch (error) {
-                console.warn("User Profile 載入失敗，採用離線臨時快取狀態");
-                currentUser = {
-                    username: username,
-                    cardId: "D" + Math.floor(10000000 + Math.random() * 90000000), // 臨時卡號
-                    borrowedBooks: {}
-                };
+                console.warn("User Profile 載入失敗或受到限制，採用離線臨時快取狀態");
+                loadFallbackUserProfile(username);
             }
+        }
+
+        function loadFallbackUserProfile(username) {
+            currentUser = {
+                username: username,
+                cardId: "D" + Math.floor(10000000 + Math.random() * 90000000), // 臨時卡號
+                borrowedBooks: {}
+            };
         }
 
         async function syncUserProfileToDatabase() {
             if (!currentUser) return;
+            if (USER_PROFILE_APPS_SCRIPT_URL === "YOUR_USER_PROFILE_APPS_SCRIPT_URL_HERE") {
+                console.warn("未配置 USER_PROFILE_APPS_SCRIPT_URL，無法同步寫入雲端");
+                return;
+            }
             try {
                 const payload = {
                     action: "updateUserProfile",
@@ -1234,7 +1255,7 @@
                     borrowedBooks: currentUser.borrowedBooks
                 };
 
-                await fetch(APPS_SCRIPT_URL, {
+                await fetch(USER_PROFILE_APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'text/plain' },
@@ -1321,7 +1342,6 @@
         const BOOKS_CSV_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vS01kcFvbXs1L6e_V3jInI4VB5pISZMPuz3mxTWUXQWv7Y4la2NbQxWz6i7tZ5czBgdvBI83A4jIwmc/pub?output=csv`;
         const CATEGORIES_CSV_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vS01kcFvbXs1L6e_V3jInI4VB5pISZMPuz3mxTWUXQWv7Y4la2NbQxWz6i7tZ5czBgdvBI83A4jIwmc/pub?output=csv&gid=565039517`;
         const MAP_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREyJWmMzv1p2obev-jTKdRsuCyhHKXy2mVGVMNICmYLkn9pOjpgmx0umxZ9rJYZqvPYEvqucp6VwJN/pub?output=csv";
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZSo-2MRZ-7QoXsQgFG32hew7aXSpgZmwjCP6FARkLcCrmyluw2L0ZZJsbc-H5fVRf/exec";
 
         // ==========================================
         // 2. 視圖切換與導覽 (SPA Engine)
@@ -1378,7 +1398,7 @@
         }
 
         // ==========================================
-        // 3. 空間預約與自習室地圖 (selfstudy.html)
+        // 3. 空間預約與自習室地圖 (selfstudy.html) (只連動 RESERVATION_APPS_SCRIPT_URL)
         // ==========================================
         function enterSelfStudyMap() {
             document.getElementById('booking-lobby').classList.add('hidden');
@@ -1532,6 +1552,16 @@
             checkMySeatStatus();
         }
 
+        function checkMySeatStatus() {
+            let mySeatId = "未登記";
+            Object.keys(localCacheOccupied).forEach(seatId => {
+                if (localCacheOccupied[seatId].status === 'occupied' && localCacheOccupied[seatId].name.toLowerCase() === '林建華') {
+                    mySeatId = `9F - ${seatId}`;
+                }
+            });
+            document.getElementById('home-seat-badge').innerText = mySeatId;
+        }
+
         function calculateLobbySeats() {
             const lobbyFree = document.getElementById('lobby-free-seats');
             if (lobbyFree && (lobbyFree.innerText === '--' || lobbyFree.innerText === '0')) {
@@ -1670,12 +1700,14 @@
             renderGridMap();
             calculateMapStatistics();
 
-            fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify({ seatId: selectedCell.seatId, minecraftId: mcId, action: 'register' })
-            }).catch(() => {});
+            if (RESERVATION_APPS_SCRIPT_URL !== "YOUR_RESERVATION_APPS_SCRIPT_URL_HERE") {
+                fetch(RESERVATION_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ seatId: selectedCell.seatId, minecraftId: mcId, action: 'register' })
+                }).catch(() => {});
+            }
         }
 
         async function confirmCancelRegistration() {
@@ -1693,7 +1725,9 @@
             renderGridMap();
             calculateMapStatistics();
 
-            fetch(`${APPS_SCRIPT_URL}?action=cancel&seatId=${encodeURIComponent(selectedCell.seatId)}&minecraftId=${encodeURIComponent(mcId)}`).catch(() => {});
+            if (RESERVATION_APPS_SCRIPT_URL !== "YOUR_RESERVATION_APPS_SCRIPT_URL_HERE") {
+                fetch(`${RESERVATION_APPS_SCRIPT_URL}?action=cancel&seatId=${encodeURIComponent(selectedCell.seatId)}&minecraftId=${encodeURIComponent(mcId)}`).catch(() => {});
+            }
         }
 
         // ==========================================
@@ -1724,7 +1758,6 @@
 
         function calculateDatabaseStatistics() {
             const total = booksData.length;
-            const borrowedCount = myBorrowedBooks.length;
             const available = booksData.filter(b => !myBorrowedBooks.some(m => m.id === b.id)).length;
             const checkedOut = total - available;
             const rate = total > 0 ? ((checkedOut / total) * 100).toFixed(1) + '%' : '12.4%';
