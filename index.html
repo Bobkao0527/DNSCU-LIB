@@ -966,6 +966,42 @@
         </div>
     </div>
 
+    <!-- Local File / Sandbox SSO Warning Modal -->
+    <div id="local-sso-warning-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden transition-all duration-300 opacity-0">
+        <div class="bg-white border border-slate-200 w-full max-w-md p-6 rounded-3xl mx-4 shadow-2xl relative transform scale-95 transition-all duration-300" id="sso-warning-content">
+            <button onclick="closeSSOWarningModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="mb-4 text-center">
+                <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-500 border border-amber-200 flex items-center justify-center mx-auto mb-3">
+                    <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-500"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">偵測到本地執行或沙盒環境</h3>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                    您目前正在「本地網頁檔案 (file://)」或「沙盒預覽」環境中運行。Minecraft SSO 登入系統不支援直接跳轉回非 HTTPS 協定或 null 來源網域。
+                </p>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-2 mb-4">
+                <p><strong>自動生成的跳轉網址：</strong></p>
+                <code class="block bg-slate-200 p-2 rounded font-mono text-[10px] break-all text-left" id="sso-warning-url">null</code>
+                <p class="text-[10px] text-amber-600 text-left">
+                    💡 提示：若登入頁面顯示「沒有跳轉目標」，請手動複製上方網址，或在下方輸入您實際測試的本地網域（例如 <code>http://127.0.0.1:5500</code>）。
+                </p>
+            </div>
+
+            <div class="text-left">
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1">手動指定跳轉目標網址 (選填)</label>
+                <input type="text" id="manual-redirect-input" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-nscu-green" placeholder="http://127.0.0.1:5500/index.html">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-6">
+                <button onclick="closeSSOWarningModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors">取消登入</button>
+                <button onclick="proceedWithManualSSO()" class="px-4 py-2.5 bg-nscu-500 hover:bg-nscu-600 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95">強制登入跳轉</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 頁尾資訊區 -->
     <footer class="bg-slate-900 text-slate-400 py-12 text-sm border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1060,8 +1096,12 @@
             if (hash && hash.startsWith('#token=')) {
                 token = hash.split('#token=')[1];
                 localStorage.setItem('mc_auth_token', token);
-                // 立即清除網址 Hash，維護美觀與隱私
-                history.replaceState(null, document.title, window.location.pathname + window.location.search);
+                // 立即清除網址 Hash，維護美觀與隱私（安全沙盒保護避免出錯）
+                try {
+                    history.replaceState(null, document.title, window.location.pathname + window.location.search);
+                } catch (e) {
+                    console.warn("無法清除網址 Hash (沙盒安全限制):", e);
+                }
             } else {
                 // 2. 嘗試讀取本地快取 Token
                 token = localStorage.getItem('mc_auth_token');
@@ -1198,57 +1238,57 @@
         }
 
         function redirectToSSO() {
-            // 自動記錄當前首頁網址為登入後的重定向目的地
-            const callbackUrl = window.location.origin + window.location.pathname;
+            let callbackUrl = "";
+            try {
+                const url = new URL(window.location.href);
+                url.hash = ""; // 移除舊 hash
+                url.searchParams.delete('token'); // 移除 url parameter 中的舊 token
+                callbackUrl = url.toString();
+            } catch (e) {
+                callbackUrl = window.location.origin + window.location.pathname;
+            }
+
+            // 偵測是否為不支援自動跳轉的 file:// 或沙盒 iframe (null)
+            if (callbackUrl.startsWith('file:') || callbackUrl.includes('null/') || callbackUrl.startsWith('blob:')) {
+                showLocalFileSSOWarning(callbackUrl);
+                return;
+            }
+
             window.location.href = `${SSO_PORTAL_URL}?redirect=${encodeURIComponent(callbackUrl)}`;
         }
 
-        function logout() {
-            localStorage.removeItem('mc_auth_token');
-            setGuestMode();
-            showToast("🧹 已成功登出帳號，清除認證憑證。");
-        }
-
-        function logoutSilently() {
-            localStorage.removeItem('mc_auth_token');
-            setGuestMode();
-        }
-
-        // 核心身份拦截守衛 (Guard)
-        function guardAction(actionCallback) {
-            if (!currentUser) {
-                showToast("⚠️ 此操作需要登入身份驗證！正在為您導向登入大廳...", "warning");
-                setTimeout(() => {
-                    redirectToSSO();
-                }, 1200);
-                return false;
-            }
-            if (actionCallback) actionCallback();
-            return true;
-        }
-
-        // ==========================================
-        // 3. 視圖切換與導覽 (SPA Engine)
-        // ==========================================
-        function switchView(viewName) {
-            // 隱藏所有面板
-            document.querySelectorAll('.view-panel').forEach(el => el.classList.replace('block', 'hidden'));
+        function showLocalFileSSOWarning(urlText) {
+            const modal = document.getElementById('local-sso-warning-modal');
+            const content = document.getElementById('sso-warning-content');
+            document.getElementById('sso-warning-url').textContent = urlText;
+            document.getElementById('manual-redirect-input').value = urlText.includes('null/') ? "" : urlText;
             
-            // 顯現特定面板
-            const activePanel = document.getElementById(`view-${viewName}`);
-            if (activePanel) {
-                activePanel.classList.replace('hidden', 'block');
-            }
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.replace('opacity-0', 'opacity-100');
+                content.classList.replace('scale-95', 'scale-100');
+                lucide.createIcons();
+            }, 10);
+        }
 
-            // 更新導覽列按鈕高亮狀態
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all";
-            });
-            const activeBtn = document.getElementById(`nav-${viewName}`);
-            if (activeBtn) {
-                activeBtn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-bold text-nscu-500 bg-white shadow-sm";
-            }
+        function closeSSOWarningModal() {
+            const modal = document.getElementById('local-sso-warning-modal');
+            const content = document.getElementById('sso-warning-content');
+            modal.classList.replace('opacity-100', 'opacity-0');
+            content.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 150);
+        }
 
+        function proceedWithManualSSO() {
+            const manualUrl = document.getElementById('manual-redirect-input').value.trim();
+            const finalUrl = manualUrl || document.getElementById('sso-warning-url').textContent;
+            closeSSOWarningModal();
+            window.location.href = `${SSO_PORTAL_URL}?redirect=${encodeURIComponent(finalUrl)}`;
+        }
+
+        function setLoginMode(user) {
             // 行動端
             document.querySelectorAll('[id^="mob-nav-"]').forEach(btn => {
                 btn.className = "flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-nscu-100 hover:bg-nscu-700 transition-all";
