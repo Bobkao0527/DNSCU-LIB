@@ -105,11 +105,6 @@
             transform: translateY(-4px);
             box-shadow: 0 12px 20px -8px rgba(27, 67, 50, 0.15);
         }
-        /* 鎖頭毛玻璃遮罩 */
-        .locked-overlay {
-            backdrop-filter: blur(8px);
-            background-color: rgba(255, 255, 255, 0.82);
-        }
     </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col font-sans">
@@ -140,20 +135,9 @@
                     <button id="nav-barb" onclick="switchView('barb')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all"><i data-lucide="arrow-left-right" class="w-4 h-4 inline mr-1.5"></i>借還書系統</button>
                 </div>
 
-                <!-- 右側：個人化功能 (登入狀態動態切換) -->
+                <!-- 右側：個人化功能 (純白按鈕) -->
                 <div class="hidden md:flex items-center space-x-3">
-                    <div id="nav-user-badge" class="hidden items-center space-x-2.5 bg-nscu-600 px-4 py-2 rounded-xl text-sm border border-nscu-700">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span id="nav-username" class="font-bold text-nscu-100">MinecraftUser</span>
-                        <button onclick="logoutSSO()" class="text-xs text-rose-300 hover:text-rose-100 transition-colors pl-2 border-l border-nscu-500">登出</button>
-                    </div>
-                    
-                    <button id="nav-login-btn" onclick="loginSSO()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-5 py-2.5 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
-                        <i data-lucide="log-in" class="w-4 h-4 text-nscu-500"></i>
-                        <span>校園帳號登入</span>
-                    </button>
-
-                    <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-4 py-2.5 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
+                    <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-4 py-2 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
                         <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
                         <span>虛擬借閱證</span>
                     </button>
@@ -186,18 +170,6 @@
                 <button onclick="switchView('barb'); toggleMobileMenu()" id="mob-nav-barb" class="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-nscu-100 hover:bg-nscu-700 transition-all">
                     <i data-lucide="arrow-left-right" class="w-4 h-4"></i>借還書系統
                 </button>
-                <div class="pt-2 border-t border-nscu-500">
-                    <div id="mob-user-badge" class="hidden items-center justify-between px-4 py-2.5 bg-nscu-700 rounded-xl text-xs">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span id="mob-username" class="font-bold">Username</span>
-                        </div>
-                        <button onclick="logoutSSO()" class="text-rose-300 font-bold">登出</button>
-                    </div>
-                    <button id="mob-login-btn" onclick="loginSSO(); toggleMobileMenu()" class="flex w-full items-center justify-center gap-2 bg-white text-nscu-500 font-bold py-3 rounded-xl text-sm">
-                        <i data-lucide="log-in" class="w-4 h-4"></i>校園帳號登入
-                    </button>
-                </div>
             </div>
         </div>
     </nav>
@@ -254,7 +226,7 @@
             <!-- 實時狀態看板 (Dashboard Metrics) -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-                    <!-- 指標 1: 書籍出借率 -->
+                    <!-- 指標 1: 書籍出借率 (原在館人數) -->
                     <div class="bg-white border border-slate-100 p-6 rounded-2xl flex items-center justify-between shadow-sm hover:shadow-md transition-all">
                         <div>
                             <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">書籍出借率</span>
@@ -343,6 +315,11 @@
                                     <div class="h-4 bg-slate-200 rounded w-1/3"></div>
                                     <div class="h-3 bg-slate-200 rounded w-full"></div>
                                 </div>
+                                <div class="animate-pulse space-y-3 p-5 rounded-xl border border-slate-100 bg-slate-50/50">
+                                    <div class="w-10 h-10 rounded-lg bg-slate-200"></div>
+                                    <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+                                    <div class="h-3 bg-slate-200 rounded w-full"></div>
+                                </div>
                             </div>
                         </section>
 
@@ -368,55 +345,37 @@
 
                     <!-- 右欄：讀者資訊與熱門排行榜 -->
                     <div class="space-y-8">
-                        <!-- 個人摘要卡 (SSO 連動保護) -->
-                        <div class="bg-gradient-to-br from-nscu-500 to-nscu-700 p-6 rounded-2xl text-white shadow-nscu-glow relative overflow-hidden min-h-[220px]">
+                        <!-- 個人摘要卡 -->
+                        <div class="bg-gradient-to-br from-nscu-500 to-nscu-700 p-6 rounded-2xl text-white shadow-nscu-glow relative overflow-hidden">
                             <div class="absolute -right-8 -bottom-8 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-                            
-                            <!-- 已登入狀態 -->
-                            <div id="home-user-logged-in" class="hidden space-y-6">
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 rounded-full border border-white/30 p-1 bg-white/10 flex items-center justify-center">
-                                        <span class="font-bold text-lg text-white" id="home-user-avatar">?</span>
-                                    </div>
-                                    <div>
-                                        <div class="flex items-center space-x-1.5">
-                                            <h4 class="font-bold text-white text-base" id="home-user-displayname">MinecraftUser</h4>
-                                            <span class="text-[9px] bg-white/20 text-white border border-white/30 px-1.5 py-0.5 rounded font-mono">已認證</span>
-                                        </div>
-                                        <p class="text-xs text-nscu-100 mt-1" id="home-user-cardnum">借閱證號: --</p>
-                                    </div>
+                            <div class="flex items-center space-x-4 mb-6">
+                                <div class="w-12 h-12 rounded-full border border-white/30 p-1 bg-white/10 flex items-center justify-center">
+                                    <span class="font-bold text-lg text-white">林</span>
                                 </div>
-                                
-                                <div class="grid grid-cols-2 gap-3 border-t border-white/10 pt-4 text-center">
-                                    <div class="bg-white/5 p-3 rounded-xl border border-white/10">
-                                        <span class="text-[10px] text-nscu-200 block mb-0.5">當前借閱</span>
-                                        <span class="font-bold text-lg text-white" id="home-borrow-badge">0</span><span class="text-xs text-nscu-100"> 冊</span>
+                                <div>
+                                    <div class="flex items-center space-x-1.5">
+                                        <h4 class="font-bold text-white text-base">林建華</h4>
+                                        <span class="text-[9px] bg-white/20 text-white border border-white/30 px-1.5 py-0.5 rounded font-mono">系統工程系</span>
                                     </div>
-                                    <div class="bg-white/5 p-3 rounded-xl border border-white/10">
-                                        <span class="text-[10px] text-nscu-200 block mb-0.5">自習座位</span>
-                                        <span class="font-bold text-sm text-white" id="home-seat-badge">未登記</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="mt-4">
-                                    <button onclick="toggleLibraryCard()" class="w-full py-3 bg-white text-nscu-600 hover:bg-slate-100 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm">
-                                        <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
-                                        <span>顯示我的虛擬借閱卡</span>
-                                    </button>
+                                    <p class="text-xs text-nscu-100 mt-1">學號: D112098012</p>
                                 </div>
                             </div>
-
-                            <!-- 未登入狀態 (鎖頭與登入提示) -->
-                            <div id="home-user-logged-out" class="flex flex-col items-center justify-center h-full text-center py-6 space-y-4">
-                                <div class="w-12 h-12 bg-white/10 border border-white/20 rounded-full flex items-center justify-center text-white">
-                                    <i data-lucide="lock" class="w-6 h-6 text-nscu-accent"></i>
+                            
+                            <div class="grid grid-cols-2 gap-3 border-t border-white/10 pt-4 text-center">
+                                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                                    <span class="text-[10px] text-nscu-200 block mb-0.5">當前借閱</span>
+                                    <span class="font-bold text-lg text-white" id="home-borrow-badge">0</span><span class="text-xs text-nscu-100"> 冊</span>
                                 </div>
-                                <div class="space-y-1">
-                                    <h4 class="font-bold text-white text-sm">請先登入校園帳號</h4>
-                                    <p class="text-xs text-nscu-200 px-4">登入後即可自動生成虛擬借閱證、查詢名下借書、預約 9F 自習座位與使用自助借還系統。</p>
+                                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
+                                    <span class="text-[10px] text-nscu-200 block mb-0.5">自習座位</span>
+                                    <span class="font-bold text-sm text-white" id="home-seat-badge">未登記</span>
                                 </div>
-                                <button onclick="loginSSO()" class="px-6 py-2 bg-white hover:bg-nscu-50 text-nscu-600 text-xs font-bold rounded-xl transition-all shadow-md">
-                                    一鍵安全登入
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button onclick="toggleLibraryCard()" class="w-full py-3 bg-white text-nscu-600 hover:bg-slate-100 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                                    <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
+                                    顯示我的虛擬借閱卡
                                 </button>
                             </div>
                         </div>
@@ -529,9 +488,9 @@
         <!-- ========================================== -->
         <!-- VIEW 3: 空間預約系統 (Booking View) -->
         <!-- ========================================== -->
-        <section id="view-booking" class="view-panel hidden max-w-7xl w-full mx-auto px-4 py-8 relative">
+        <section id="view-booking" class="view-panel hidden max-w-7xl w-full mx-auto px-4 py-8">
             
-            <!-- 1. 第一級：空間預約大廳 (Lobby) -->
+            <!-- 第一級：空間預約大廳 (Lobby) -->
             <div id="booking-lobby" class="space-y-8">
                 <div class="text-left">
                     <h2 class="text-2xl font-serif font-black text-nscu-500">學習與研究空間預約大廳</h2>
@@ -560,7 +519,7 @@
                         </div>
                     </div>
 
-                    <!-- 4F研討室卡片 -->
+                    <!-- 4F研討室卡片 (虛擬演示) -->
                     <div onclick="showSimulationToast('4F 多功能研討室')" class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between h-80">
                         <div>
                             <div class="w-14 h-14 bg-amber-50 text-amber-600 border border-amber-100 rounded-2xl flex items-center justify-center mb-6">
@@ -581,7 +540,7 @@
                         </div>
                     </div>
 
-                    <!-- 3F研究小間卡片 -->
+                    <!-- 3F研究小間卡片 (虛擬演示) -->
                     <div onclick="showSimulationToast('3F 個人研究小間')" class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between h-80">
                         <div>
                             <div class="w-14 h-14 bg-blue-50 text-blue-600 border border-blue-100 rounded-2xl flex items-center justify-center mb-6">
@@ -604,7 +563,7 @@
                 </div>
             </div>
 
-            <!-- 2. 第二級：9F 自習室實體地圖預約系統 (Map Room) -->
+            <!-- 第二級：9F 自習室實體地圖預約系統 (Map Room) -->
             <div id="booking-selfstudy" class="space-y-4 hidden">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
@@ -665,6 +624,7 @@
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
                     <!-- 工具控制列與圖例 -->
                     <div class="p-3 bg-slate-50 border-b border-slate-200 flex flex-col lg:flex-row items-center justify-between gap-3">
+                        <!-- 實體圖例說明 -->
                         <div class="flex flex-wrap items-center gap-2">
                             <div class="flex flex-wrap items-center gap-2 text-slate-600 text-[11px] bg-white border border-slate-200 rounded-lg p-1.5">
                                 <span class="flex items-center gap-1">
@@ -699,6 +659,7 @@
                                        placeholder="搜尋座位編號 (如 A001)...">
                             </div>
                             
+                            <!-- 縮放比例控制 -->
                             <div class="flex items-center bg-white border border-slate-300 rounded-lg p-0.5 text-[11px]">
                                 <button onclick="changeZoom(-0.1)" class="w-7 h-6 flex items-center justify-center hover:bg-slate-100 rounded text-slate-600 transition-colors">
                                     <i class="fa-solid fa-minus"></i>
@@ -730,24 +691,11 @@
                             <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
                             <span id="mapStatusMessage">地圖加載中。</span>
                         </div>
+                        <div class="flex items-center gap-1 text-slate-400 self-end">
+                            <i class="fa-regular fa-lightbulb"></i>
+                            <span>雙擊地圖可重置縮放 (90%)</span>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- SSO 鎖頭遮罩 (空間預約受限區) -->
-            <div id="booking-lock-mask" class="absolute inset-0 locked-overlay z-30 flex flex-col items-center justify-center p-6 text-center">
-                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-premium max-w-md space-y-5 transform translate-y-0 transition-transform duration-500">
-                    <div class="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto shadow-md">
-                        <i data-lucide="lock" class="w-8 h-8"></i>
-                    </div>
-                    <div class="space-y-2">
-                        <h3 class="text-xl font-bold text-slate-900">自修與討論空間受限區</h3>
-                        <p class="text-sm text-slate-500">預約與登記系統需要驗證您的學生與教職員帳戶身分，請先完成 SSO 登入授權。</p>
-                    </div>
-                    <button onclick="loginSSO()" class="w-full py-3.5 bg-nscu-500 hover:bg-nscu-600 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
-                        <i data-lucide="log-in" class="w-4 h-4"></i>
-                        <span>使用中央帳號登入</span>
-                    </button>
                 </div>
             </div>
         </section>
@@ -755,8 +703,8 @@
         <!-- ========================================== -->
         <!-- VIEW 4: 自助借還書系統 (BARB View) -->
         <!-- ========================================== -->
-        <section id="view-barb" class="view-panel hidden max-w-4xl w-full mx-auto px-4 py-8 relative">
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-premium p-8 max-w-2xl mx-auto space-y-8 min-h-[400px]">
+        <section id="view-barb" class="view-panel hidden max-w-4xl w-full mx-auto px-4 py-8">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-premium p-8 max-w-2xl mx-auto space-y-8">
                 <div class="text-center">
                     <div class="w-16 h-16 bg-nscu-50 text-nscu-500 border border-nscu-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <i data-lucide="arrow-left-right" class="w-8 h-8"></i>
@@ -783,31 +731,15 @@
                     </div>
                 </div>
 
-                <!-- 便捷快捷測試區 -->
+                <!-- 便捷快捷測試區 (直接點選測試) -->
                 <div class="space-y-3">
                     <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                         <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-nscu-accent"></i> 點選快速試驗 (當前在庫書籍)
                     </h4>
                     <div id="barb-quick-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <!-- 動態載入在庫書 -->
                         <div class="animate-pulse h-10 bg-slate-100 rounded-xl"></div>
                     </div>
-                </div>
-            </div>
-
-            <!-- SSO 鎖頭遮罩 (借還書受限區) -->
-            <div id="barb-lock-mask" class="absolute inset-0 locked-overlay z-30 flex flex-col items-center justify-center p-6 text-center">
-                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-premium max-w-md space-y-5">
-                    <div class="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto shadow-md">
-                        <i data-lucide="lock" class="w-8 h-8"></i>
-                    </div>
-                    <div class="space-y-2">
-                        <h3 class="text-xl font-bold text-slate-900">自助借書機權限存取限制</h3>
-                        <p class="text-sm text-slate-500">辦理圖書外借、續借與歸還登記手續需要登入個人資料卡，請完成帳號驗證。</p>
-                    </div>
-                    <button onclick="loginSSO()" class="w-full py-3.5 bg-nscu-500 hover:bg-nscu-600 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
-                        <i data-lucide="log-in" class="w-4 h-4"></i>
-                        <span>登入帳號啟用借書機</span>
-                    </button>
                 </div>
             </div>
         </section>
@@ -824,45 +756,29 @@
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
 
-            <!-- 登入卡片介面 -->
-            <div id="card-modal-logged-in" class="hidden space-y-6">
-                <div>
-                    <h3 class="text-lg font-bold text-nscu-500 flex items-center gap-1.5"><i data-lucide="contact-2" class="text-nscu-500"></i>DNSCU 虛擬學生閱覽證</h3>
-                    <p class="text-xs text-slate-500 mt-1">於各樓層自助借書機刷此條碼即可輕鬆完成借還手續。</p>
-                </div>
+            <!-- 卡片 -->
+            <div class="mb-6">
+                <h3 class="text-lg font-bold text-nscu-500 flex items-center gap-1.5"><i data-lucide="contact-2" class="text-nscu-500"></i>DNSCU 虛擬學生閱覽證</h3>
+                <p class="text-xs text-slate-500 mt-1">於各樓層自助借書機刷此條碼即可輕鬆完成借還手續。</p>
+            </div>
 
-                <!-- 條碼模擬區域 -->
-                <div class="bg-gradient-to-r from-nscu-500 to-nscu-600 p-6 rounded-2xl border border-nscu-100 text-center text-white">
-                    <span class="text-[9px] text-nscu-100 tracking-widest font-mono uppercase block mb-3 font-semibold">數位校園認證憑證</span>
-                    <div class="bg-white p-4 rounded-xl flex flex-col items-center justify-center shadow-inner">
-                        <div class="w-full h-16 bg-white flex items-stretch space-x-0.5 justify-center">
-                            <div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div>
-                        </div>
-                        <span id="card-modal-barcode-id" class="text-slate-800 text-xs font-mono font-bold tracking-widest mt-2">D--------</span>
+            <!-- 條碼模擬區域 -->
+            <div class="bg-gradient-to-r from-nscu-500 to-nscu-600 p-6 rounded-2xl border border-nscu-100 mb-6 text-center text-white">
+                <span class="text-[9px] text-nscu-100 tracking-widest font-mono uppercase block mb-3 font-semibold">數位校園認證憑證</span>
+                <div class="bg-white p-4 rounded-xl flex flex-col items-center justify-center shadow-inner">
+                    <div class="w-full h-16 bg-white flex items-stretch space-x-0.5 justify-center">
+                        <div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div>
                     </div>
-                </div>
-
-                <!-- 當前借閱明細清單 -->
-                <div class="space-y-3">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">個人當前借閱清單 (30日借閱期)</h4>
-                    <div class="space-y-2 max-h-48 overflow-y-auto scrollbar-thin pr-1" id="my-books-borrowed-container">
-                        <!-- 動態渲染個人已借書 -->
-                    </div>
+                    <span class="text-slate-800 text-xs font-mono font-bold tracking-widest mt-2">D112098012</span>
                 </div>
             </div>
 
-            <!-- 未登入提示卡片介面 -->
-            <div id="card-modal-logged-out" class="py-8 flex flex-col items-center justify-center text-center space-y-4">
-                <div class="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center shadow-inner">
-                    <i data-lucide="lock" class="w-8 h-8 text-amber-500"></i>
+            <!-- 當前借閱明細清單 -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">個人當前借閱清單</h4>
+                <div class="space-y-2 max-h-48 overflow-y-auto scrollbar-thin pr-1" id="my-books-borrowed-container">
+                    <!-- 動態渲染個人已借書 -->
                 </div>
-                <div class="space-y-1">
-                    <h3 class="text-lg font-bold text-slate-900">尚未啟用借閱卡</h3>
-                    <p class="text-sm text-slate-500 px-6 leading-relaxed">虛擬閱覽證需要讀取您的校園身分與條碼，請先點擊下方按鈕完成登入程序。</p>
-                </div>
-                <button onclick="loginSSO(); toggleLibraryCard()" class="px-8 py-3 bg-nscu-500 hover:bg-nscu-600 text-white font-bold rounded-xl text-xs transition-all shadow-md">
-                    登入啟用借閱證
-                </button>
             </div>
 
             <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
@@ -944,7 +860,7 @@
                     </div>
                 </div>
 
-                <!-- 線上虛擬操作鈕 (SSO/User Sheet連動) -->
+                <!-- 線上虛擬操作鈕 (SPA 同步) -->
                 <div class="pt-2">
                     <button id="modal-action-btn" onclick="executeModalBorrowReturn()" class="w-full py-3 rounded-xl font-bold text-sm text-white shadow-md active:scale-95 transition-all flex items-center justify-center gap-2">
                         <!-- 動態借還功能 -->
@@ -983,7 +899,7 @@
                     <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">線上入座登記</h4>
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">Minecraft 玩家 ID</label>
-                        <input type="text" id="regName" readonly class="w-full px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-lg text-xs text-slate-500 font-bold" placeholder="未登入">
+                        <input type="text" id="regName" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-nscu-green" placeholder="輸入您的 Minecraft 遊戲名稱">
                     </div>
                     <button id="registerSubmitBtn" onclick="saveRegistration()" class="w-full bg-nscu-green hover:bg-nscu-darkgreen text-white text-xs font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow mt-1">
                         <span id="regBtnSpinner" class="hidden"><i class="fa-solid fa-spinner animate-spin"></i></span>
@@ -991,7 +907,7 @@
                     </button>
                 </div>
 
-                <!-- 已佔用詳情 -->
+                <!-- 已佔用詳情 (匿名保護) -->
                 <div id="detailsSection" class="space-y-3 hidden">
                     <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">目前座位狀態</h4>
                     <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5 text-xs">
@@ -1013,13 +929,13 @@
                         </button>
                         
                         <div id="cancelFormInput" class="space-y-2 hidden">
-                            <label class="block text-[10px] font-bold text-rose-600">⚠️ 結束劃位確認：</label>
-                            <input type="text" id="cancelNameInput" readonly class="w-full px-3 py-1.5 bg-slate-100 border border-rose-300 rounded-lg text-xs text-slate-500 font-bold" placeholder="Minecraft ID">
+                            <label class="block text-[10px] font-bold text-rose-600">⚠️ 請輸入登記時的 Minecraft ID 以進行身分驗證：</label>
+                            <input type="text" id="cancelNameInput" class="w-full px-3 py-1.5 bg-white border border-rose-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-rose-500" placeholder="請輸入您當初登記的 Minecraft ID">
                             <div class="grid grid-cols-2 gap-2 pt-1">
-                                <button onclick="toggleCancelForm(false)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] font-semibold py-1.5 rounded-lg transition-all font-bold font-bold">取消</button>
-                                <button id="cancelSubmitBtn" onclick="confirmCancelRegistration()" class="bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-semibold py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 font-bold">
+                                <button onclick="toggleCancelForm(false)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] font-semibold py-1.5 rounded-lg transition-all">取消</button>
+                                <button id="cancelSubmitBtn" onclick="confirmCancelRegistration()" class="bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-semibold py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5">
                                     <span id="cancelSpinner" class="hidden"><i class="fa-solid fa-spinner animate-spin"></i></span>
-                                    <span>結束使用</span>
+                                    <span>驗證並結束使用</span>
                                 </button>
                             </div>
                         </div>
@@ -1103,257 +1019,48 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- JAVASCRIPT GLOBAL LOGIC (SSO & 圖書館一體化) -->
+    <!-- JAVASCRIPT GLOBAL LOGIC (全網頁控制核心) -->
     <!-- ========================================== -->
     <script>
         // ==========================================
-        // -------------------------------------------------------------
-        // 請在此填寫您的 Google Apps Script 後端部署網址 (Web App URL)
-        // -------------------------------------------------------------
-        // 1. 處理 9F自習室劃位登記與取消的 Apps Script (對接自習室試算表)
-        const RESERVATION_APPS_SCRIPT_URL = "https://script.google.com/macros/library/d/1080LwYjDlHmDs-kss5M0_tI0uEjUc5Xikg0TKwB8tvgzhJdi8AzzUrr7/1";
-
-        // 2. 處理使用者名稱、借閱碼、借閱書籍的 Apps Script (對接圖書館 User Sheet 試算表)
-        const USER_PROFILE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_5l_-UMO-hWGkhz2trSeAyV5-tS2bkUn8euDSM_aGI1qEZvWHp-lIbdXapcYjdzdE/exec";
-        // ==========================================
-
-        const AUTH_CENTER_URL = "https://dolphinloginsystem.pages.dev";
-        const VERIFY_API_URL = "https://dolphinloginsystem.pages.dev/api/verify";
-        
-        let currentUser = null; // 儲存登入的使用者資訊 { username, cardId, borrowedBooks: {} }
-
-        async function initSSO() {
-            const urlParams = new URLSearchParams(window.location.hash.substring(1));
-            let token = urlParams.get('token');
-
-            if (token) {
-                localStorage.setItem('mc_auth_token', token);
-                // 移除網址列 hash
-                history.replaceState(null, document.title, window.location.pathname + window.location.search);
-            } else {
-                token = localStorage.getItem('mc_auth_token');
-            }
-
-            if (token) {
-                await verifyToken(token);
-            } else {
-                updateAuthUI(false);
-            }
-        }
-
-        async function verifyToken(token) {
-            try {
-                const response = await fetch(VERIFY_API_URL, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.valid) {
-                        // 驗證成功，進一步載入該使用者的個人圖書館資料 (借閱證號與圖書清單)
-                        await fetchUserLibraryProfile(data.username);
-                        updateAuthUI(true);
-                    } else {
-                        localStorage.removeItem('mc_auth_token');
-                        updateAuthUI(false);
-                        showToast("⚠️ 登入憑證已失效，請重新登入", "warning");
-                    }
-                } else {
-                    localStorage.removeItem('mc_auth_token');
-                    updateAuthUI(false);
-                }
-            } catch (error) {
-                console.error("SSO Verify Failed:", error);
-                // 離線模式或 API 連線失敗，不直接登出以優化可用性
-                updateAuthUI(false);
-            }
-        }
-
-        function loginSSO() {
-            window.location.href = `${AUTH_CENTER_URL}?returnUrl=${encodeURIComponent(window.location.href)}`;
-        }
-
-        function logoutSSO() {
-            localStorage.removeItem('mc_auth_token');
-            showToast("👋 已成功安全登出");
-            setTimeout(() => {
-                window.location.reload();
-            }, 800);
-        }
-
-        // ==========================================
-        // 0.1 串接 Apps Script 獲取與更新 User Profile (只連動 USER_PROFILE_APPS_SCRIPT_URL)
-        // ==========================================
-        async function fetchUserLibraryProfile(username) {
-            if (USER_PROFILE_APPS_SCRIPT_URL === "YOUR_USER_PROFILE_APPS_SCRIPT_URL_HERE") {
-                console.warn("未配置 USER_PROFILE_APPS_SCRIPT_URL，載入離線臨時模擬用戶檔案");
-                loadFallbackUserProfile(username);
-                return;
-            }
-            try {
-                const profileUrl = `${USER_PROFILE_APPS_SCRIPT_URL}?action=getUserProfile&username=${encodeURIComponent(username)}`;
-                const response = await fetch(profileUrl);
-                
-                if (response.ok) {
-                    const res = await response.json();
-                    if (res.status === 'success') {
-                        currentUser = {
-                            username: username,
-                            cardId: res.data.cardId,
-                            borrowedBooks: res.data.borrowedBooks || {} // dictionary 結構
-                        };
-                        
-                        // 同步至 localCache
-                        myBorrowedBooks = [];
-                        Object.keys(currentUser.borrowedBooks).forEach(bookId => {
-                            const bDateStr = currentUser.borrowedBooks[bookId];
-                            const book = booksData.find(b => b.id.toLowerCase() === bookId.toLowerCase());
-                            const bookTitle = book ? book.title : `索書號: ${bookId}`;
-                            
-                            // 期限 30 日計算
-                            const borrowDate = new Date(bDateStr);
-                            const returnDate = new Date(borrowDate);
-                            returnDate.setDate(borrowDate.getDate() + 30);
-
-                            myBorrowedBooks.push({
-                                id: bookId,
-                                title: bookTitle,
-                                returnDate: returnDate.toLocaleDateString('zh-TW')
-                            });
-                        });
-                        localStorage.setItem('NSCU_MY_BORROWED', JSON.stringify(myBorrowedBooks));
-                    }
-                }
-            } catch (error) {
-                console.warn("User Profile 載入失敗或受到限制，採用離線臨時快取狀態");
-                loadFallbackUserProfile(username);
-            }
-        }
-
-        function loadFallbackUserProfile(username) {
-            currentUser = {
-                username: username,
-                cardId: "D" + Math.floor(10000000 + Math.random() * 90000000), // 臨時卡號
-                borrowedBooks: {}
-            };
-        }
-
-        async function syncUserProfileToDatabase() {
-            if (!currentUser) return;
-            if (USER_PROFILE_APPS_SCRIPT_URL === "YOUR_USER_PROFILE_APPS_SCRIPT_URL_HERE") {
-                console.warn("未配置 USER_PROFILE_APPS_SCRIPT_URL，無法同步寫入雲端");
-                return;
-            }
-            try {
-                const payload = {
-                    action: "updateUserProfile",
-                    username: currentUser.username,
-                    cardId: currentUser.cardId,
-                    borrowedBooks: currentUser.borrowedBooks
-                };
-
-                await fetch(USER_PROFILE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify(payload)
-                });
-            } catch (e) {
-                console.error("更新遠端 User 失敗", e);
-            }
-        }
-
-        // ==========================================
-        // 0.2 SSO 狀態的介面 UI 切換
-        // ==========================================
-        function updateAuthUI(isLoggedIn) {
-            const loginBtn = document.getElementById('nav-login-btn');
-            const userBadge = document.getElementById('nav-user-badge');
-            const mobLoginBtn = document.getElementById('mob-login-btn');
-            const mobUserBadge = document.getElementById('mob-user-badge');
-            
-            const bookingMask = document.getElementById('booking-lock-mask');
-            const barbMask = document.getElementById('barb-lock-mask');
-
-            if (isLoggedIn && currentUser) {
-                // 桌機
-                loginBtn.classList.add('hidden');
-                userBadge.classList.replace('hidden', 'flex');
-                document.getElementById('nav-username').textContent = currentUser.username;
-
-                // 行動端
-                mobLoginBtn.classList.add('hidden');
-                mobUserBadge.classList.replace('hidden', 'flex');
-                document.getElementById('mob-username').textContent = currentUser.username;
-
-                // 首頁個人卡片切換
-                document.getElementById('home-user-logged-out').classList.add('hidden');
-                document.getElementById('home-user-logged-in').classList.remove('hidden');
-                document.getElementById('home-user-displayname').textContent = currentUser.username;
-                document.getElementById('home-user-cardnum').textContent = `借閱證號: ${currentUser.cardId}`;
-                document.getElementById('home-user-avatar').textContent = currentUser.username.substring(0, 1).toUpperCase();
-
-                // 移除鎖頭毛玻璃
-                if (bookingMask) bookingMask.classList.add('hidden');
-                if (barbMask) barbMask.classList.add('hidden');
-
-                // 閱覽證 Modal
-                document.getElementById('card-modal-logged-out').classList.add('hidden');
-                document.getElementById('card-modal-logged-in').classList.remove('hidden');
-                document.getElementById('card-modal-barcode-id').textContent = currentUser.cardId;
-
-                // 填入劃位預設名字
-                const regNameInput = document.getElementById('regName');
-                if (regNameInput) regNameInput.value = currentUser.username;
-                const cancelNameInput = document.getElementById('cancelNameInput');
-                if (cancelNameInput) cancelNameInput.value = currentUser.username;
-
-            } else {
-                // 桌機
-                loginBtn.classList.remove('hidden');
-                userBadge.classList.replace('flex', 'hidden');
-
-                // 行動端
-                mobLoginBtn.classList.remove('hidden');
-                mobUserBadge.classList.replace('flex', 'hidden');
-
-                // 首頁個人卡片切換
-                document.getElementById('home-user-logged-in').classList.add('hidden');
-                document.getElementById('home-user-logged-out').classList.remove('hidden');
-
-                // 加上鎖頭毛玻璃遮罩
-                if (bookingMask) bookingMask.classList.remove('hidden');
-                if (barbMask) barbMask.classList.remove('hidden');
-
-                // 閱覽證 Modal
-                document.getElementById('card-modal-logged-in').classList.add('hidden');
-                document.getElementById('card-modal-logged-out').classList.remove('hidden');
-            }
-
-            syncGlobalLibraryState();
-        }
-
-        // ==========================================
-        // 1. 全域資料與 API 對接
+        // 1. 全域變數與資料初始化
         // ==========================================
         const BOOKS_CSV_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vS01kcFvbXs1L6e_V3jInI4VB5pISZMPuz3mxTWUXQWv7Y4la2NbQxWz6i7tZ5czBgdvBI83A4jIwmc/pub?output=csv`;
         const CATEGORIES_CSV_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vS01kcFvbXs1L6e_V3jInI4VB5pISZMPuz3mxTWUXQWv7Y4la2NbQxWz6i7tZ5czBgdvBI83A4jIwmc/pub?output=csv&gid=565039517`;
         const MAP_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREyJWmMzv1p2obev-jTKdRsuCyhHKXy2mVGVMNICmYLkn9pOjpgmx0umxZ9rJYZqvPYEvqucp6VwJN/pub?output=csv";
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZSo-2MRZ-7QoXsQgFG32hew7aXSpgZmwjCP6FARkLcCrmyluw2L0ZZJsbc-H5fVRf/exec";
+
+        let booksData = [];
+        let categoriesData = [];
+        let announcementsData = [];
+        
+        // 9F 自習室地圖專屬變數
+        const BASE_X = -1128;
+        const BASE_Y = 118;
+        const BASE_Z = 827;
+        let gridMatrix = [];
+        let zoomLevel = 0.9;
+        let selectedCell = null;
+        let csvOccupiedSeats = {};
+        
+        // 個人借閱清單與自習室快取 (同步機制)
+        let myBorrowedBooks = JSON.parse(localStorage.getItem('NSCU_MY_BORROWED') || '[]');
+        let localCacheOccupied = JSON.parse(localStorage.getItem('NSCU_LOCAL_OCCUPIED_SEATS') || '{}');
 
         // ==========================================
         // 2. 視圖切換與導覽 (SPA Engine)
         // ==========================================
         function switchView(viewName) {
+            // 隱藏所有面板
             document.querySelectorAll('.view-panel').forEach(el => el.classList.replace('block', 'hidden'));
             
+            // 顯現特定面板
             const activePanel = document.getElementById(`view-${viewName}`);
             if (activePanel) {
                 activePanel.classList.replace('hidden', 'block');
             }
 
+            // 更新導覽列按鈕高亮狀態
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all";
             });
@@ -1362,6 +1069,7 @@
                 activeBtn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-bold text-nscu-500 bg-white shadow-sm";
             }
 
+            // 行動端
             document.querySelectorAll('[id^="mob-nav-"]').forEach(btn => {
                 btn.className = "flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-nscu-100 hover:bg-nscu-700 transition-all";
             });
@@ -1370,10 +1078,12 @@
                 activeMobBtn.className = "flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-nscu-500 bg-white shadow-sm";
             }
 
+            // 特殊分頁載入初始化 (如果背景載入失敗或尚未載入，在此提供手動觸發)
             if (viewName === 'database' && booksData.length === 0) {
                 loadLibraryDatabase();
             }
             if (viewName === 'booking') {
+                // 進入空間大廳時預設關閉地圖
                 backToBookingLobby();
                 calculateLobbySeats();
             }
@@ -1382,6 +1092,7 @@
             }
         }
 
+        // 漢堡菜單開關
         function toggleMobileMenu() {
             const mobileMenu = document.getElementById('mobile-menu');
             const menuIcon = document.getElementById('menu-icon');
@@ -1398,7 +1109,7 @@
         }
 
         // ==========================================
-        // 3. 空間預約與自習室地圖 (selfstudy.html) (只連動 RESERVATION_APPS_SCRIPT_URL)
+        // 3. 空間預約子路由與地圖繪製 (selfstudy.html)
         // ==========================================
         function enterSelfStudyMap() {
             document.getElementById('booking-lobby').classList.add('hidden');
@@ -1541,6 +1252,7 @@
             document.getElementById('statOccupied').textContent = occupied;
             document.getElementById('statUsageRate').textContent = rate;
 
+            // 首頁與大廳聯動 (解決非分頁狀態下的未取得問題)
             const homeRate = document.getElementById('home-seat-rate');
             const homeDesc = document.getElementById('home-seat-free-desc');
             const lobbyFree = document.getElementById('lobby-free-seats');
@@ -1549,6 +1261,7 @@
             if (homeDesc) homeDesc.innerText = `餘位 ${freeSeats} 席・在線人數同步中`;
             if (lobbyFree) lobbyFree.innerText = freeSeats;
 
+            // 檢查個人劃位狀態
             checkMySeatStatus();
         }
 
@@ -1563,6 +1276,7 @@
         }
 
         function calculateLobbySeats() {
+            // 計算大廳座位數 (已與地圖同步，如未加載則使用預設值)
             const lobbyFree = document.getElementById('lobby-free-seats');
             if (lobbyFree && (lobbyFree.innerText === '--' || lobbyFree.innerText === '0')) {
                 lobbyFree.innerText = "124";
@@ -1620,13 +1334,44 @@
             container.appendChild(fragment);
         }
 
+        // 地圖搜尋與縮放
+        function highlightOnMap() {
+            const query = document.getElementById('mapSearch').value.toLowerCase().trim();
+            const cells = document.querySelectorAll('#seatGridContainer > .grid-cell');
+            cells.forEach(cell => {
+                const seatId = cell.dataset.seatId;
+                if (!seatId) {
+                    cell.style.opacity = query ? "0.1" : "1";
+                    return;
+                }
+                if (!query) {
+                    cell.style.opacity = "1";
+                    cell.style.filter = "none";
+                    cell.style.transform = "none";
+                    return;
+                }
+                if (seatId.toLowerCase().includes(query)) {
+                    cell.style.opacity = "1";
+                    cell.style.filter = "drop-shadow(0 0 4px rgba(245, 158, 11, 0.9))";
+                    cell.style.transform = "scale(1.15)";
+                    cell.style.zIndex = "10";
+                } else {
+                    cell.style.opacity = "0.15";
+                    cell.style.filter = "grayscale(80%)";
+                    cell.style.transform = "none";
+                    cell.style.zIndex = "1";
+                }
+            });
+        }
+
+        function changeZoom(delta) {
+            zoomLevel = Math.max(0.3, Math.min(1.8, zoomLevel + delta));
+            document.getElementById('zoomPercent').textContent = `${Math.round(zoomLevel * 100)}%`;
+            document.getElementById('seatGridContainer').style.transform = `scale(${zoomLevel})`;
+        }
+
         // Seat Modal
         function openSeatModal(seatId, x, y, z) {
-            if (!currentUser) {
-                showToast("⚠️ 請先完成 SSO 登入，方可進行座位預約！", "warning");
-                return;
-            }
-
             selectedCell = { seatId, x, y, z };
             const modal = document.getElementById('seatModal');
             const container = document.getElementById('seatModalContainer');
@@ -1641,7 +1386,6 @@
 
             title.textContent = `座位 ${seatId}`;
             document.getElementById('modalCoords').textContent = `${x}, ${y}, ${z}`;
-            
             const isOccupied = checkSeatOccupied(seatId);
 
             if (seatId.startsWith('A')) {
@@ -1652,30 +1396,15 @@
                 badge.className = "text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-900/40 border border-blue-400/30 text-blue-100";
             }
 
-            const occupant = csvOccupiedSeats[seatId] || (localCacheOccupied[seatId] ? localCacheOccupied[seatId].name : "");
-            const isMySeat = occupant.toLowerCase() === currentUser.username.toLowerCase();
-
             if (isOccupied) {
                 headerBg.className = "bg-gradient-to-r from-slate-600 to-slate-700 text-white p-5 relative";
-                statusText.innerHTML = isMySeat 
-                    ? '<i class="fa-solid fa-circle-user text-emerald-300"></i> 此座位目前正由您登記使用中'
-                    : '<i class="fa-solid fa-user-lock"></i> 座位已被使用 (隱私保護中)';
-                
+                statusText.innerHTML = '<i class="fa-solid fa-user-lock"></i> 座位已被使用 (隱私保護中)';
                 document.getElementById('detailsSection').classList.remove('hidden');
-                
-                // 只有本人可以結束使用
-                const cancelArea = document.getElementById('cancelArea');
-                if (isMySeat) {
-                    cancelArea.classList.remove('hidden');
-                    document.getElementById('cancelNameInput').value = currentUser.username;
-                } else {
-                    cancelArea.classList.add('hidden');
-                }
             } else {
                 headerBg.className = "bg-gradient-to-r from-nscu-green to-nscu-darkgreen text-white p-5 relative";
                 statusText.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-300"></i> 空閒開放登記中';
                 document.getElementById('formSection').classList.remove('hidden');
-                document.getElementById('regName').value = currentUser.username;
+                document.getElementById('regName').value = '林建華'; // 預填登入者
             }
 
             modal.classList.remove('hidden');
@@ -1685,9 +1414,36 @@
             }, 10);
         }
 
+        function closeSeatModal() {
+            const modal = document.getElementById('seatModal');
+            const container = document.getElementById('seatModalContainer');
+            modal.classList.replace('opacity-100', 'opacity-0');
+            container.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                selectedCell = null;
+            }, 150);
+        }
+
+        function toggleCancelForm(show) {
+            const btn = document.getElementById('showCancelFormBtn');
+            const inputArea = document.getElementById('cancelFormInput');
+            if (show) {
+                btn.classList.add('hidden');
+                inputArea.classList.remove('hidden');
+            } else {
+                btn.classList.remove('hidden');
+                inputArea.classList.add('hidden');
+            }
+        }
+
         async function saveRegistration() {
-            if (!selectedCell || !currentUser) return;
-            const mcId = currentUser.username;
+            if (!selectedCell) return;
+            const mcId = document.getElementById('regName').value.trim();
+            if (!mcId) {
+                showToast("⚠️ 請輸入您的 Minecraft ID！", "warning");
+                return;
+            }
 
             localCacheOccupied[selectedCell.seatId] = {
                 status: 'occupied',
@@ -1700,19 +1456,27 @@
             renderGridMap();
             calculateMapStatistics();
 
-            if (RESERVATION_APPS_SCRIPT_URL !== "YOUR_RESERVATION_APPS_SCRIPT_URL_HERE") {
-                fetch(RESERVATION_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ seatId: selectedCell.seatId, minecraftId: mcId, action: 'register' })
-                }).catch(() => {});
-            }
+            // 虛擬觸發 Apps Script 背景發送
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ seatId: selectedCell.seatId, minecraftId: mcId, action: 'register' })
+            }).catch(() => {});
         }
 
         async function confirmCancelRegistration() {
-            if (!selectedCell || !currentUser) return;
-            const mcId = currentUser.username;
+            if (!selectedCell) return;
+            const inputMcId = document.getElementById('cancelNameInput').value.trim();
+            if (!inputMcId) {
+                showToast("⚠️ 請輸入您登記時的 Minecraft ID！", "warning");
+                return;
+            }
+
+            if (inputMcId.toLowerCase() !== '林建華' && inputMcId.toLowerCase() !== (csvOccupiedSeats[selectedCell.seatId] || "").toLowerCase()) {
+                showToast("❌ 身分驗證失敗！非登記本人不可結束佔用。", "error");
+                return;
+            }
 
             localCacheOccupied[selectedCell.seatId] = {
                 status: 'free',
@@ -1725,13 +1489,41 @@
             renderGridMap();
             calculateMapStatistics();
 
-            if (RESERVATION_APPS_SCRIPT_URL !== "YOUR_RESERVATION_APPS_SCRIPT_URL_HERE") {
-                fetch(`${RESERVATION_APPS_SCRIPT_URL}?action=cancel&seatId=${encodeURIComponent(selectedCell.seatId)}&minecraftId=${encodeURIComponent(mcId)}`).catch(() => {});
+            // 背景向 Apps Script 遞交退還
+            fetch(`${APPS_SCRIPT_URL}?action=cancel&seatId=${encodeURIComponent(selectedCell.seatId)}&minecraftId=${encodeURIComponent(inputMcId)}`).catch(() => {});
+        }
+
+        function copyMinecraftAction(type) {
+            if (!selectedCell) return;
+            const { x, y, z } = selectedCell;
+            const textToCopy = type === 'tp' ? `/tp @s ${x} ${y} ${z}` : `${x} ${y} ${z}`;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast(`📋 已複製：${textToCopy}`);
+            });
+        }
+
+        function loadFallbackMockGrid() {
+            const dummyRows = [];
+            for (let r = 0; r < 77; r++) {
+                const cols = [];
+                for (let c = 0; c < 52; c++) {
+                    if (r === 0 || r === 76 || c === 0 || c === 51) {
+                        cols.push("L");
+                    } else if ((r === 10 || r === 30 || r === 50) && (c >= 10 && c <= 40)) {
+                        cols.push("T");
+                    } else if (r % 5 === 2 && c % 4 === 2) {
+                        cols.push(`A${r * 100 + c}`);
+                    } else {
+                        cols.push("");
+                    }
+                }
+                dummyRows.push(cols);
             }
+            processCSVGrid(dummyRows);
         }
 
         // ==========================================
-        // 4. 圖書檢索與連動 (database.html)
+        // 4. 圖書檢索系統與對接 (database.html)
         // ==========================================
         async function loadLibraryDatabase() {
             try {
@@ -1739,7 +1531,7 @@
                     fetch(CATEGORIES_CSV_URL),
                     fetch(BOOKS_CSV_URL)
                 ]);
-                if (!catRes.ok || !booksRes.ok) throw new Error("Connection Error");
+                if (!catRes.ok || !booksRes.ok) throw new Error("CORS or Connection Error");
 
                 const catCsvText = await catRes.text();
                 const booksCsvText = await booksRes.text();
@@ -1756,8 +1548,45 @@
             }
         }
 
+        function normalizeCategories(rawList) {
+            return rawList.map(row => ({
+                code: (row['code'] || row['分類代碼'] || '').trim(),
+                name: (row['name'] || row['分類名稱'] || '').trim(),
+                floor: (row['floor'] || row['放置樓層'] || '').trim(),
+            })).filter(cat => cat.code && cat.name);
+        }
+
+        function normalizeBooks(rawList) {
+            return rawList.map(row => ({
+                id: (row['索書號'] || row['id'] || '').trim(),
+                title: (row['書名'] || row['title'] || '').trim(),
+                author: (row['作者'] || row['author'] || '').trim(),
+                recorder: (row['引入'] || row['recorder'] || '').trim(),
+                category: (row['主分類'] || row['category'] || '').trim(),
+                sub_category: (row['細部分類'] || row['sub_category'] || '').trim(),
+                location: (row['位置'] || row['location'] || '').trim(),
+                description: (row['簡介'] || row['description'] || '').trim(),
+                status: (row['狀態'] || row['status'] || '').trim(),
+                isbn: (row['DS-ISBN'] || row['isbn'] || row['ISBN'] || '').trim()
+            })).filter(book => book.id && book.title);
+        }
+
+        function buildCategoryFilter() {
+            const select = document.getElementById('categoryFilter');
+            select.innerHTML = '<option value="ALL">所有學科分類</option>';
+            categoriesData.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.name;
+                opt.textContent = `${cat.code} ${cat.name} (${cat.floor})`;
+                select.appendChild(opt);
+            });
+        }
+
         function calculateDatabaseStatistics() {
             const total = booksData.length;
+            const borrowedCount = myBorrowedBooks.length;
+            
+            // 模擬動態在架計算：剔除被個人借出的
             const available = booksData.filter(b => !myBorrowedBooks.some(m => m.id === b.id)).length;
             const checkedOut = total - available;
             const rate = total > 0 ? ((checkedOut / total) * 100).toFixed(1) + '%' : '12.4%';
@@ -1767,15 +1596,14 @@
             document.getElementById('checkedOutBooks').textContent = checkedOut;
             document.getElementById('borrowRate').textContent = rate;
 
+            // 同步與渲染首頁的【書籍出借率】與動態指標敘述 (解決未點開分頁無法取得的問題)
             const homeBorrowRate = document.getElementById('home-borrow-rate');
             const homeBorrowDesc = document.getElementById('home-borrow-desc');
             
             if (homeBorrowRate) homeBorrowRate.textContent = rate;
             if (homeBorrowDesc) {
-                homeBorrowDesc.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>已外借 ${checkedOut} 冊 / 共 ${total} 冊`;
+                homeBorrowDesc.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>已借出 ${checkedOut} 冊 / 共 ${total} 冊`;
             }
-        }
-
         }
 
         function renderBooks(data) {
@@ -1932,74 +1760,71 @@
         }
 
         // ==========================================
-        // 5. 借書還書核心邏輯 (30日借閱字典結構連動)
+        // 5. 借還書系統核心邏輯 (barb.html)
         // ==========================================
-        function borrowBook(bookId) {
-            if (!currentUser) {
-                showToast("⚠️ 請先完成 SSO 登入，方可辦理借閱！", "warning");
+        function handleBarbAction(action) {
+            const inputVal = document.getElementById('barb-input-id').value.trim();
+            if (!inputVal) {
+                showToast("⚠️ 請輸入或點選索書號！", "warning");
                 return;
             }
+            if (action === 'borrow') {
+                borrowBook(inputVal);
+            } else {
+                returnBook(inputVal);
+            }
+            document.getElementById('barb-input-id').value = "";
+        }
 
+        function borrowBook(bookId) {
             const book = booksData.find(b => b.id.toLowerCase() === bookId.toLowerCase());
             if (!book) {
                 showToast("❌ 找不到此索書號對應的圖書！", "error");
                 return;
             }
-            if (currentUser.borrowedBooks[book.id]) {
-                showToast("⚠️ 您已借閱過此書籍！", "warning");
+            if (myBorrowedBooks.some(b => b.id === book.id)) {
+                showToast("⚠️ 您已借閱過此書籍！");
                 return;
             }
 
-            // 更新個人狀態 (dictionary 結構)
-            const todayStr = new Date().toISOString().split('T')[0];
-            currentUser.borrowedBooks[book.id] = todayStr;
-
-            // 期限 30 日計算
+            const today = new Date();
             const returnDate = new Date();
-            returnDate.setDate(returnDate.getDate() + 30);
+            returnDate.setDate(today.getDate() + 14);
 
             myBorrowedBooks.push({
                 id: book.id,
                 title: book.title,
                 returnDate: returnDate.toLocaleDateString('zh-TW')
             });
-
             localStorage.setItem('NSCU_MY_BORROWED', JSON.stringify(myBorrowedBooks));
-            showToast(`🎉 成功借閱《${book.title}》！`);
             
-            // 同步至 Apps Script User Sheet
-            syncUserProfileToDatabase();
+            showToast(`🎉 成功借閱《${book.title}》！`);
             syncGlobalLibraryState();
         }
 
         function returnBook(bookId) {
-            if (!currentUser) return;
-
-            const book = booksData.find(b => b.id.toLowerCase() === bookId.toLowerCase());
             const idx = myBorrowedBooks.findIndex(b => b.id.toLowerCase() === bookId.toLowerCase());
-            
             if (idx === -1) {
-                showToast("⚠️ 您的借閱清單中沒有這本書！", "warning");
+                showToast("⚠️ 您的借閱清單中無此圖書索書號！", "warning");
                 return;
             }
-
-            // 自 dictionary 中移除
-            delete currentUser.borrowedBooks[bookId];
+            const bookTitle = myBorrowedBooks[idx].title;
             myBorrowedBooks.splice(idx, 1);
-
             localStorage.setItem('NSCU_MY_BORROWED', JSON.stringify(myBorrowedBooks));
-            showToast(`🧹 《${book ? book.title : bookId}》歸還完成！`);
-            
-            // 同步至 Apps Script User Sheet
-            syncUserProfileToDatabase();
+
+            showToast(`🧹 《${bookTitle}》歸還完成！`);
             syncGlobalLibraryState();
         }
 
         function syncGlobalLibraryState() {
+            // 更新虛擬借閱證列表
             renderMyBorrowedList();
+            
+            // 更新首頁指標
             const badge1 = document.getElementById('home-borrow-badge');
             if (badge1) badge1.innerText = myBorrowedBooks.length;
             
+            // 重新計算與過濾檢索
             calculateDatabaseStatistics();
             if (document.getElementById('view-database').classList.contains('block')) {
                 applyFilters();
@@ -2254,7 +2079,6 @@
             toggleAnnouncementModal();
         }
 
-        // 其他基礎模擬功能維持不變...
         function toggleAnnouncementModal() {
             const modal = document.getElementById('announcement-modal');
             if (modal.classList.contains('hidden')) {
@@ -2268,21 +2092,108 @@
             }
         }
 
+        function toggleLibraryCard() {
+            const modal = document.getElementById('library-card-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('card-modal-content').classList.replace('scale-95', 'scale-100');
+                }, 10);
+            } else {
+                document.getElementById('card-modal-content').classList.replace('scale-100', 'scale-95');
+                setTimeout(() => { modal.classList.add('hidden'); }, 150);
+            }
+        }
+
+        function renderDefaultHomeData() {
+            const defaultAnnouncements = [
+                { date: "2026 / 06 / 15", title: "期末考週 24 小時自習室開放與供電公告", content: "自習室全區提供定時冷氣、穩定無線網路。請留意貴重物品保管。" },
+                { date: "2026 / 06 / 10", title: "IEEE Xplore 學術期刊資料庫連線效能升級", content: "電子資源中心已完成專屬頻寬對接，論文下載延遲降低 80%。" }
+            ];
+            const defaultHotBooks = [
+                { title: "數位網絡安全與攻防實務", borrows: "128" },
+                { title: "系統架構與分散式運算", borrows: "94" }
+            ];
+            const defaultGuides = [
+                { title: "個人席位極簡預約", content: "全區自習席位皆配備感應 QR 碼，現場掃描即可入座登記。" },
+                { title: "跨校聯盟借閱合作", content: "憑虛擬閱覽證即可申請跨校聯盟圖書館閱覽與圖書外借。" }
+            ];
+            const defaultOpening = [
+                { days: "週一 至 週五", hours: "08:00 - 22:30" },
+                { days: "週六 至 週日", hours: "09:00 - 22:00" }
+            ];
+            announcementsData = defaultAnnouncements;
+            renderAnnouncements(defaultAnnouncements);
+            renderHotBooks(defaultHotBooks);
+            renderGuides(defaultGuides);
+            renderOpeningHours(defaultOpening);
+        }
+
+        function loadFallbackBooks() {
+            booksData = [
+                { id: "9-A101", title: "數位網絡安全與攻防實務", author: "Bob Kao", category: "資訊工程", sub_category: "網絡安全", location: "-1110\\118\\835", description: "本書深入剖析當代數位網絡面臨的安全威脅、滲透測試技巧以及主動攻防策略實踐。", status: "在架上", isbn: "978-986-1234-56-1" },
+                { id: "9-A103", title: "系統架構與分散式運算", author: "Jerry Chen", category: "資訊工程", sub_category: "分散式系統", location: "-1105\\118\\840", description: "探討分散式架構下的高併發、高可用機制，並結合紅石電路邏輯原理進行系統性模型建置指南。", status: "在架上", isbn: "978-986-9876-54-3" },
+                { id: "9-B105", title: "人工智慧：現代方法 (第四版)", author: "Stuart Russell", category: "人工智慧", sub_category: "機器學習", location: "-1120\\118\\828", description: "公認最權威、最經典的AI教科書，完整涵蓋深度學習、強化學習與神經網路的數學原理與實務。", status: "在架上", isbn: "978-986-5555-11-2" }
+            ];
+            categoriesData = [
+                { code: "000", name: "資訊工程", floor: "9F" },
+                { code: "100", name: "人工智慧", floor: "9F" }
+            ];
+            buildCategoryFilter();
+            calculateDatabaseStatistics();
+            applyFilters();
+        }
+
+        // 當點擊 Modal 外部時關閉
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('bookModal')) closeModal();
+            if (e.target === document.getElementById('seatModal')) closeSeatModal();
+        });
+
+        // 輕提示 Toast 控制
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const icon = document.getElementById('toast-icon');
+            
+            toastMsg.textContent = message;
+            if (type === "success") {
+                icon.className = "fa-solid fa-check-circle text-emerald-400";
+            } else if (type === "warning") {
+                icon.className = "fa-solid fa-triangle-exclamation text-amber-400";
+            } else {
+                icon.className = "fa-solid fa-circle-xmark text-rose-500";
+            }
+            
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        function showSimulationToast(spaceName) {
+            showToast(`⚙️ [虛擬預約] 成功提交 ${spaceName} 的預約申請！`, "success");
+        }
+
         // ==========================================
         // 7. 初始化程序與背景載入
         // ==========================================
-        window.onload = async function() {
+        window.onload = function() {
             lucide.createIcons();
             
-            // 先載入圖書跟地圖基礎數據
-            await loadLibraryDatabase();
-            await loadMapData();
-            
-            // 執行 SSO 攔截驗證與個人化綁定
-            await initSSO();
-            
-            // 加載公告
+            // 1. 立即載入 Google Sheets 首頁配置 (公告、指南、開館時間)
             fetchHomeSheetData();
+            
+            // 2. 立即背景載入圖書資料庫 (計算並呈現出借率，不需等待點擊分頁)
+            loadLibraryDatabase();
+
+            // 3. 立即背景載入自習室地圖資料 (計算並呈現座位使用率，不需等待進入地圖)
+            loadMapData();
+            
+            // 4. 初始化個人借閱明細與狀態同步
+            syncGlobalLibraryState();
         }
     </script>
 </body>
