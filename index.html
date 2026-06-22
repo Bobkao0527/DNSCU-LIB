@@ -1776,6 +1776,161 @@
             }
         }
 
+        }
+
+        function renderBooks(data) {
+            const grid = document.getElementById('booksGrid');
+            grid.innerHTML = '';
+
+            if (data.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400">沒有尋找到符合篩選條件的書籍。</div>`;
+                return;
+            }
+
+            data.forEach(book => {
+                const isBorrowedByMe = myBorrowedBooks.some(b => b.id === book.id);
+                const isAvailable = !isBorrowedByMe && (book.status === '在架上' || book.status === '在館中');
+                const statusClass = isAvailable ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100';
+
+                const card = document.createElement('div');
+                card.className = 'book-card bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between cursor-pointer shadow-sm relative group';
+                card.onclick = () => openBookModal(book);
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-4 mb-3">
+                            <span class="text-[11px] font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full border border-slate-200/60 max-w-[85%] truncate">
+                                ${book.category || '未分類'} ${book.sub_category ? '· ' + book.sub_category : ''}
+                            </span>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug mb-1 group-hover:text-nscu-500 transition-colors line-clamp-2">${book.title}</h3>
+                        <div class="text-xs text-slate-500 mb-4">著者：${book.author || '未知著者'}</div>
+                        <p class="text-xs text-slate-600 leading-relaxed bg-slate-50/75 rounded-lg p-3 border border-slate-100/50 mb-4 line-clamp-3">
+                            ${book.description || '暫無此圖書的詳細簡介，歡迎入館參閱實體書庫。'}
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100 space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="px-2 py-0.5 rounded-full border font-semibold text-[10px] ${statusClass}">
+                                ${isAvailable ? '在架上' : '借閱中'}
+                            </span>
+                            <span class="text-slate-400 font-mono text-[10px]">${book.id}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const category = document.getElementById('categoryFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            const filtered = booksData.filter(book => {
+                const matchesSearch = book.title.toLowerCase().includes(query) || book.author.toLowerCase().includes(query) || book.id.toLowerCase().includes(query);
+                const matchesCategory = (category === 'ALL' || book.category === category);
+                
+                const isBorrowedByMe = myBorrowedBooks.some(b => b.id === book.id);
+                const isAvailable = !isBorrowedByMe && (book.status === '在架上' || book.status === '在館中');
+                
+                let matchesStatus = true;
+                if (status === '在架上') matchesStatus = isAvailable;
+                if (status === '借閱中') matchesStatus = !isAvailable;
+
+                return matchesSearch && matchesCategory && matchesStatus;
+            });
+
+            renderBooks(filtered);
+            document.getElementById('searchFeedback').innerHTML = `檢索完成：共尋獲 <strong class="text-nscu-green">${filtered.length}</strong> 本符合條件之館藏`;
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = 'ALL';
+            document.getElementById('statusFilter').value = 'ALL';
+            applyFilters();
+        }
+
+        // Book Detail Modal
+        let activeModalBook = null;
+        function openBookModal(book) {
+            activeModalBook = book;
+            const modal = document.getElementById('bookModal');
+            const container = document.getElementById('modalContainer');
+            
+            document.getElementById('modalCategory').textContent = `${book.category || '未分類'} ${book.sub_category ? ' · ' + book.sub_category : ''}`;
+            document.getElementById('modalTitle').textContent = book.title;
+            document.getElementById('modalAuthor').innerHTML = `<span>著者：${book.author}</span>`;
+            document.getElementById('modalDescription').textContent = book.description || '暫無詳細描述。';
+            document.getElementById('modalBookId').textContent = book.id;
+            document.getElementById('modalISBN').textContent = book.isbn ? `ISBN: ${book.isbn}` : 'ISBN: 暫無';
+
+            // 座標格式
+            const rawLocation = book.location ? book.location.trim() : '未標記';
+            document.getElementById('modalLocationDisplay').textContent = rawLocation !== '未標記' ? rawLocation.replace(/\\/g, ', ') : '未標記';
+
+            // 狀態與操作按鈕渲染
+            const isBorrowedByMe = myBorrowedBooks.some(b => b.id === book.id);
+            const isAvailable = !isBorrowedByMe && (book.status === '在架上' || book.status === '在館中');
+            const statusEl = document.getElementById('modalStatus');
+            const actionBtn = document.getElementById('modal-action-btn');
+
+            if (isAvailable) {
+                statusEl.textContent = "在架上";
+                statusEl.className = "inline-block text-xs px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-bold";
+                actionBtn.textContent = "在線預約借閱此書";
+                actionBtn.className = "w-full py-3 bg-nscu-500 hover:bg-nscu-600 text-white rounded-xl font-bold text-sm shadow active:scale-95 transition-all flex items-center justify-center gap-2";
+            } else {
+                statusEl.textContent = isBorrowedByMe ? "已被您借出" : "借閱中";
+                statusEl.className = "inline-block text-xs px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-bold";
+                if (isBorrowedByMe) {
+                    actionBtn.textContent = "立即線上歸還";
+                    actionBtn.className = "w-full py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-sm shadow active:scale-95 transition-all flex items-center justify-center gap-2";
+                } else {
+                    actionBtn.textContent = "此書已被他人出借";
+                    actionBtn.className = "w-full py-3 bg-slate-200 text-slate-400 rounded-xl font-bold text-sm cursor-not-allowed flex items-center justify-center gap-2";
+                }
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.replace('opacity-0', 'opacity-100');
+                container.classList.replace('scale-95', 'scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('bookModal');
+            const container = document.getElementById('modalContainer');
+            modal.classList.replace('opacity-100', 'opacity-0');
+            container.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                activeModalBook = null;
+            }, 150);
+        }
+
+        function copyCommand(type) {
+            if (!activeModalBook || !activeModalBook.location) return;
+            const spaceCoords = activeModalBook.location.trim().replace(/\\/g, ' ');
+            const text = type === 'tp' ? `/tp @s ${spaceCoords}` : spaceCoords;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`已成功複製: ${text}`);
+            });
+        }
+
+        function executeModalBorrowReturn() {
+            if (!activeModalBook) return;
+            const isBorrowedByMe = myBorrowedBooks.some(b => b.id === activeModalBook.id);
+            if (isBorrowedByMe) {
+                returnBook(activeModalBook.id);
+            } else {
+                borrowBook(activeModalBook.id);
+            }
+            closeModal();
+        }
+
         // ==========================================
         // 5. 借書還書核心邏輯 (30日借閱字典結構連動)
         // ==========================================
