@@ -1203,15 +1203,6 @@
 
         function redirectToSSO() {
             let callbackUrl = window.location.origin + window.location.pathname;
-            
-            // 💡 核心修正：如果部署在 GitHub Pages (網址含 github.io) 且沒以 index.html 結尾
-            // 自動補上 index.html，確保完美精準匹配您在 SSO 後台註冊的安全白名單跳轉網址！
-            if (callbackUrl.includes('github.io') && !callbackUrl.endsWith('index.html')) {
-                if (!callbackUrl.endsWith('/')) {
-                    callbackUrl += '/';
-                }
-                callbackUrl += 'index.html';
-            }
 
             // 偵測是否為不支援自動跳轉的 file:// 或沙盒 iframe (null)
             if (callbackUrl.startsWith('file:') || callbackUrl.includes('null/') || callbackUrl.startsWith('blob:')) {
@@ -1350,6 +1341,34 @@
                         <p class="text-xs text-slate-500">請確認您的網路連線或稍後再試。</p>
                     </div>
                 `;
+            }
+        }
+
+        function updateMapStatus(isOnline, shortText, longText) {
+            const statusMsg = document.getElementById('mapStatusMessage');
+            const statusText = document.getElementById('statusText');
+            const statusDot = document.getElementById('statusDot');
+
+            if (statusMsg) {
+                statusMsg.textContent = longText;
+            }
+
+            if (statusText) {
+                statusText.textContent = shortText;
+            }
+
+            if (statusDot) {
+                statusDot.classList.remove(
+                    'bg-emerald-400',
+                    'bg-red-400',
+                    'animate-pulse'
+                );
+
+                if (isOnline) {
+                    statusDot.classList.add('bg-emerald-400');
+                } else {
+                    statusDot.classList.add('bg-red-400', 'animate-pulse');
+                }
             }
         }
 
