@@ -135,8 +135,8 @@
                     <button id="nav-barb" onclick="switchView('barb')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all"><i data-lucide="arrow-left-right" class="w-4 h-4 inline mr-1.5"></i>借還書系統</button>
                 </div>
 
-                <!-- 右側：個人化功能 (純白按鈕) -->
-                <div class="hidden md:flex items-center space-x-3">
+                <!-- 右側：個人化功能 -->
+                <div class="hidden md:flex items-center space-x-3" id="nav-auth-area">
                     <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-4 py-2 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
                         <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
                         <span>虛擬借閱證</span>
@@ -315,11 +315,6 @@
                                     <div class="h-4 bg-slate-200 rounded w-1/3"></div>
                                     <div class="h-3 bg-slate-200 rounded w-full"></div>
                                 </div>
-                                <div class="animate-pulse space-y-3 p-5 rounded-xl border border-slate-100 bg-slate-50/50">
-                                    <div class="w-10 h-10 rounded-lg bg-slate-200"></div>
-                                    <div class="h-4 bg-slate-200 rounded w-1/2"></div>
-                                    <div class="h-3 bg-slate-200 rounded w-full"></div>
-                                </div>
                             </div>
                         </section>
 
@@ -345,19 +340,20 @@
 
                     <!-- 右欄：讀者資訊與熱門排行榜 -->
                     <div class="space-y-8">
-                        <!-- 個人摘要卡 -->
+                        <!-- 個人摘要卡 (動態對接 SSO) -->
                         <div class="bg-gradient-to-br from-nscu-500 to-nscu-700 p-6 rounded-2xl text-white shadow-nscu-glow relative overflow-hidden">
                             <div class="absolute -right-8 -bottom-8 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-                            <div class="flex items-center space-x-4 mb-6">
-                                <div class="w-12 h-12 rounded-full border border-white/30 p-1 bg-white/10 flex items-center justify-center">
-                                    <span class="font-bold text-lg text-white">林</span>
+                            
+                            <div class="flex items-center space-x-4 mb-6" id="user-profile-box">
+                                <div class="w-12 h-12 rounded-full border border-white/30 p-1 bg-white/10 flex items-center justify-center overflow-hidden" id="user-avatar-placeholder">
+                                    <span class="font-bold text-lg text-white">訪</span>
                                 </div>
                                 <div>
                                     <div class="flex items-center space-x-1.5">
-                                        <h4 class="font-bold text-white text-base">林建華</h4>
-                                        <span class="text-[9px] bg-white/20 text-white border border-white/30 px-1.5 py-0.5 rounded font-mono">系統工程系</span>
+                                        <h4 class="font-bold text-white text-base" id="user-profile-name">未登入讀者</h4>
+                                        <span class="text-[9px] bg-white/20 text-white border border-white/30 px-1.5 py-0.5 rounded font-mono" id="user-profile-badge">GUEST</span>
                                     </div>
-                                    <p class="text-xs text-nscu-100 mt-1">學號: D112098012</p>
+                                    <p class="text-xs text-nscu-100 mt-1" id="user-profile-sub">請登入以體驗智慧校園系統</p>
                                 </div>
                             </div>
                             
@@ -368,14 +364,14 @@
                                 </div>
                                 <div class="bg-white/5 p-3 rounded-xl border border-white/10">
                                     <span class="text-[10px] text-nscu-200 block mb-0.5">自習座位</span>
-                                    <span class="font-bold text-sm text-white" id="home-seat-badge">未登記</span>
+                                    <span class="font-bold text-xs text-white" id="home-seat-badge">未登記</span>
                                 </div>
                             </div>
                             
-                            <div class="mt-4">
-                                <button onclick="toggleLibraryCard()" class="w-full py-3 bg-white text-nscu-600 hover:bg-slate-100 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                            <div class="mt-4" id="user-card-action-container">
+                                <button onclick="redirectToSSO()" class="w-full py-3 bg-white text-nscu-600 hover:bg-slate-100 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm">
                                     <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
-                                    顯示我的虛擬借閱卡
+                                    登入 Minecraft 帳號
                                 </button>
                             </div>
                         </div>
@@ -519,8 +515,8 @@
                         </div>
                     </div>
 
-                    <!-- 4F研討室卡片 (虛擬演示) -->
-                    <div onclick="showSimulationToast('4F 多功能研討室')" class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between h-80">
+                    <!-- 4F研討室卡片 -->
+                    <div onclick="bookGroupSpace('4F 多功能研討室')" class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between h-80">
                         <div>
                             <div class="w-14 h-14 bg-amber-50 text-amber-600 border border-amber-100 rounded-2xl flex items-center justify-center mb-6">
                                 <i data-lucide="presentation" class="w-7 h-7"></i>
@@ -540,8 +536,8 @@
                         </div>
                     </div>
 
-                    <!-- 3F研究小間卡片 (虛擬演示) -->
-                    <div onclick="showSimulationToast('3F 個人研究小間')" class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between h-80">
+                    <!-- 3F研究小間卡片 -->
+                    <div onclick="bookGroupSpace('3F 個人研究小間')" class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between h-80">
                         <div>
                             <div class="w-14 h-14 bg-blue-50 text-blue-600 border border-blue-100 rounded-2xl flex items-center justify-center mb-6">
                                 <i data-lucide="book-open" class="w-7 h-7"></i>
@@ -709,12 +705,12 @@
                     <div class="w-16 h-16 bg-nscu-50 text-nscu-500 border border-nscu-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <i data-lucide="arrow-left-right" class="w-8 h-8"></i>
                     </div>
-                    <h2 class="text-2xl font-serif font-black text-slate-900">自主圖書借還登記機</h2>
+                    <h2 class="text-2xl font-serif font-black text-slate-900">自助圖書借還登記機</h2>
                     <p class="text-sm text-slate-500 mt-1">模擬實體借還機，刷入書籍索書號即可進行借書與還書</p>
                 </div>
 
-                <!-- 模擬刷槍輸入區 -->
-                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-4 shadow-inner">
+                <!-- 模擬刷槍輸入區 (由 SSO 接管鎖定) -->
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-4 shadow-inner" id="barb-form-panel">
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
                         <i class="fa-solid fa-barcode mr-1.5 text-nscu-500"></i> 請輸入或選取索書號 (ID) 進行刷書
                     </label>
@@ -769,7 +765,7 @@
                     <div class="w-full h-16 bg-white flex items-stretch space-x-0.5 justify-center">
                         <div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-1 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-1.5 bg-slate-900"></div><div class="w-0.5 bg-slate-900"></div><div class="w-2 bg-slate-900"></div>
                     </div>
-                    <span class="text-slate-800 text-xs font-mono font-bold tracking-widest mt-2">D112098012</span>
+                    <span class="text-slate-800 text-xs font-mono font-bold tracking-widest mt-2" id="barcode-text">GUEST-TOKEN</span>
                 </div>
             </div>
 
@@ -899,7 +895,7 @@
                     <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">線上入座登記</h4>
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-600 mb-1">Minecraft 玩家 ID</label>
-                        <input type="text" id="regName" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-nscu-green" placeholder="輸入您的 Minecraft 遊戲名稱">
+                        <input type="text" id="regName" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-nscu-green" placeholder="登入以進行登記" disabled>
                     </div>
                     <button id="registerSubmitBtn" onclick="saveRegistration()" class="w-full bg-nscu-green hover:bg-nscu-darkgreen text-white text-xs font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow mt-1">
                         <span id="regBtnSpinner" class="hidden"><i class="fa-solid fa-spinner animate-spin"></i></span>
@@ -929,8 +925,8 @@
                         </button>
                         
                         <div id="cancelFormInput" class="space-y-2 hidden">
-                            <label class="block text-[10px] font-bold text-rose-600">⚠️ 請輸入登記時的 Minecraft ID 以進行身分驗證：</label>
-                            <input type="text" id="cancelNameInput" class="w-full px-3 py-1.5 bg-white border border-rose-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-rose-500" placeholder="請輸入您當初登記的 Minecraft ID">
+                            <label class="block text-[10px] font-bold text-rose-600">⚠️ 結束佔用身分驗證中：</label>
+                            <input type="text" id="cancelNameInput" class="w-full px-3 py-1.5 bg-white border border-rose-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-rose-500" placeholder="驗證 Minecraft ID" disabled>
                             <div class="grid grid-cols-2 gap-2 pt-1">
                                 <button onclick="toggleCancelForm(false)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] font-semibold py-1.5 rounded-lg transition-all">取消</button>
                                 <button id="cancelSubmitBtn" onclick="confirmCancelRegistration()" class="bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-semibold py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5">
@@ -994,7 +990,6 @@
                     <h4 class="font-bold text-slate-200 mb-3">開館時間</h4>
                     <ul id="footer-opening-hours" class="text-xs space-y-2 text-slate-500">
                         <li class="h-3 bg-slate-800 rounded w-2/3 animate-pulse"></li>
-                        <li class="h-3 bg-slate-800 rounded w-1/2 animate-pulse"></li>
                     </ul>
                 </div>
 
@@ -1030,6 +1025,10 @@
         const MAP_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vREyJWmMzv1p2obev-jTKdRsuCyhHKXy2mVGVMNICmYLkn9pOjpgmx0umxZ9rJYZqvPYEvqucp6VwJN/pub?output=csv";
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZSo-2MRZ-7QoXsQgFG32hew7aXSpgZmwjCP6FARkLcCrmyluw2L0ZZJsbc-H5fVRf/exec";
 
+        // SSO 與 Google Apps Script 端點
+        const SSO_PORTAL_URL = "https://dolphinloginsystem.pages.dev";
+        const SSO_VERIFY_API = "https://dolphinloginsystem.pages.dev/api/verify";
+
         let booksData = [];
         let categoriesData = [];
         let announcementsData = [];
@@ -1043,12 +1042,193 @@
         let selectedCell = null;
         let csvOccupiedSeats = {};
         
-        // 個人借閱清單與自習室快取 (同步機制)
+        // 個人借閱清單與自習室快取
         let myBorrowedBooks = JSON.parse(localStorage.getItem('NSCU_MY_BORROWED') || '[]');
         let localCacheOccupied = JSON.parse(localStorage.getItem('NSCU_LOCAL_OCCUPIED_SEATS') || '{}');
 
+        // SSO 核心登入狀態
+        let currentUser = null; // 儲存登入資料: { username, expiresAt, token }
+
         // ==========================================
-        // 2. 視圖切換與導覽 (SPA Engine)
+        // 2. SSO 身份驗證與安全守衛 (Dolphin SSO Engine)
+        // ==========================================
+        async function handleSSOAuth() {
+            let token = null;
+            const hash = window.location.hash;
+
+            // 1. 偵測網址列 Hash 是否有 Token 跳回
+            if (hash && hash.startsWith('#token=')) {
+                token = hash.split('#token=')[1];
+                localStorage.setItem('mc_auth_token', token);
+                // 立即清除網址 Hash，維護美觀與隱私
+                history.replaceState(null, document.title, window.location.pathname + window.location.search);
+            } else {
+                // 2. 嘗試讀取本地快取 Token
+                token = localStorage.getItem('mc_auth_token');
+            }
+
+            if (!token) {
+                setGuestMode();
+                return;
+            }
+
+            // 3. 向驗證伺服器確認 token 效期
+            try {
+                const response = await fetch(SSO_VERIFY_API, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.valid) {
+                        currentUser = {
+                            username: data.username,
+                            expiresAt: data.expiresAt,
+                            token: token
+                        };
+                        setLoginMode(currentUser);
+                    } else {
+                        console.warn("SSO Token 已過期或不合法。");
+                        logoutSilently();
+                    }
+                } else {
+                    setGuestMode();
+                }
+            } catch (err) {
+                console.error("SSO 驗證通訊異常:", err);
+                setGuestMode();
+            }
+        }
+
+        function setLoginMode(user) {
+            // 1. 更新導覽列為「登出」按鈕
+            const authArea = document.getElementById('nav-auth-area');
+            if (authArea) {
+                authArea.innerHTML = `
+                    <button onclick="logout()" class="flex items-center space-x-2 bg-red-50 hover:bg-red-100 border border-red-200 px-4 py-2 rounded-xl text-sm font-bold text-red-600 transition-all shadow-md active:scale-95">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        <span>登出 (${user.username})</span>
+                    </button>
+                `;
+            }
+
+            // 2. 更新首頁讀者資訊摘要卡 (Minecraft Skin 動態頭像)
+            const placeholder = document.getElementById('user-avatar-placeholder');
+            if (placeholder) {
+                placeholder.innerHTML = `<img src="https://minotar.net/avatar/${user.username}/48" class="w-full h-full object-cover">`;
+                placeholder.className = "w-12 h-12 rounded-full border border-white/30 bg-white/10 flex items-center justify-center overflow-hidden";
+            }
+            document.getElementById('user-profile-name').textContent = user.username;
+            document.getElementById('user-profile-badge').textContent = "SSO 認證";
+            document.getElementById('user-profile-badge').className = "text-[9px] bg-emerald-500/20 text-emerald-100 border border-emerald-500/30 px-1.5 py-0.5 rounded font-mono";
+            document.getElementById('user-profile-sub').textContent = "Minecraft 官方認證玩家";
+
+            // 3. 更新卡片底部按鈕為登出與憑證確認
+            const cardAction = document.getElementById('user-card-action-container');
+            if (cardAction) {
+                cardAction.innerHTML = `
+                    <p class="text-center text-[10px] text-nscu-200/80 mb-2">安全認證憑證有效中</p>
+                    <button onclick="logout()" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        登出帳號
+                    </button>
+                `;
+            }
+
+            // 4. 更新條碼資訊為玩家認證字樣
+            const barcode = document.getElementById('barcode-text');
+            if (barcode) {
+                barcode.textContent = user.username;
+            }
+
+            // 重新同步並繪製系統功能
+            lucide.createIcons();
+            checkMySeatStatus();
+            renderMyBorrowedList();
+        }
+
+        function setGuestMode() {
+            currentUser = null;
+
+            // 1. 恢復導覽列為「虛擬借閱證」入口
+            const authArea = document.getElementById('nav-auth-area');
+            if (authArea) {
+                authArea.innerHTML = `
+                    <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-4 py-2 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
+                        <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
+                        <span>虛擬借閱證</span>
+                    </button>
+                `;
+            }
+
+            // 2. 恢復讀者資訊摘要卡為未登入
+            const placeholder = document.getElementById('user-avatar-placeholder');
+            if (placeholder) {
+                placeholder.innerHTML = `<span class="font-bold text-lg text-white">訪</span>`;
+                placeholder.className = "w-12 h-12 rounded-full border border-white/30 p-1 bg-white/10 flex items-center justify-center";
+            }
+            document.getElementById('user-profile-name').textContent = "未登入讀者";
+            document.getElementById('user-profile-badge').textContent = "GUEST";
+            document.getElementById('user-profile-badge').className = "text-[9px] bg-white/20 text-white border border-white/30 px-1.5 py-0.5 rounded font-mono";
+            document.getElementById('user-profile-sub').textContent = "請登入以使用預約與借書服務";
+
+            // 3. 恢復卡片按鈕
+            const cardAction = document.getElementById('user-card-action-container');
+            if (cardAction) {
+                cardAction.innerHTML = `
+                    <button onclick="redirectToSSO()" class="w-full py-3 bg-white text-nscu-600 hover:bg-slate-100 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                        <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
+                        登入 Minecraft 帳號
+                    </button>
+                `;
+            }
+
+            // 4. 重置虛擬卡
+            const barcode = document.getElementById('barcode-text');
+            if (barcode) {
+                barcode.textContent = "GUEST-TOKEN";
+            }
+
+            lucide.createIcons();
+            checkMySeatStatus();
+            renderMyBorrowedList();
+        }
+
+        function redirectToSSO() {
+            // 自動記錄當前首頁網址為登入後的重定向目的地
+            const callbackUrl = window.location.origin + window.location.pathname;
+            window.location.href = `${SSO_PORTAL_URL}?redirect=${encodeURIComponent(callbackUrl)}`;
+        }
+
+        function logout() {
+            localStorage.removeItem('mc_auth_token');
+            setGuestMode();
+            showToast("🧹 已成功登出帳號，清除認證憑證。");
+        }
+
+        function logoutSilently() {
+            localStorage.removeItem('mc_auth_token');
+            setGuestMode();
+        }
+
+        // 核心身份拦截守衛 (Guard)
+        function guardAction(actionCallback) {
+            if (!currentUser) {
+                showToast("⚠️ 此操作需要登入身份驗證！正在為您導向登入大廳...", "warning");
+                setTimeout(() => {
+                    redirectToSSO();
+                }, 1200);
+                return false;
+            }
+            if (actionCallback) actionCallback();
+            return true;
+        }
+
+        // ==========================================
+        // 3. 視圖切換與導覽 (SPA Engine)
         // ==========================================
         function switchView(viewName) {
             // 隱藏所有面板
@@ -1078,12 +1258,11 @@
                 activeMobBtn.className = "flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-nscu-500 bg-white shadow-sm";
             }
 
-            // 特殊分頁載入初始化 (如果背景載入失敗或尚未載入，在此提供手動觸發)
+            // 特殊分頁載入初始化
             if (viewName === 'database' && booksData.length === 0) {
                 loadLibraryDatabase();
             }
             if (viewName === 'booking') {
-                // 進入空間大廳時預設關閉地圖
                 backToBookingLobby();
                 calculateLobbySeats();
             }
@@ -1109,9 +1288,10 @@
         }
 
         // ==========================================
-        // 3. 空間預約子路由與地圖繪製 (selfstudy.html)
+        // 4. 空間預約子路由與地圖繪製 (selfstudy.html)
         // ==========================================
         function enterSelfStudyMap() {
+            // 自習室預約地圖不限登入查看，但入座與操作時將會觸發驗證攔截
             document.getElementById('booking-lobby').classList.add('hidden');
             document.getElementById('booking-selfstudy').classList.remove('hidden');
             loadMapData();
@@ -1120,6 +1300,12 @@
         function backToBookingLobby() {
             document.getElementById('booking-selfstudy').classList.add('hidden');
             document.getElementById('booking-lobby').classList.remove('hidden');
+        }
+
+        function bookGroupSpace(spaceName) {
+            guardAction(() => {
+                showSimulationToast(spaceName);
+            });
         }
 
         async function loadMapData() {
@@ -1138,8 +1324,15 @@
                 });
             } catch (error) {
                 console.error(error);
-                updateMapStatus(false, "離線備份載入中", "加載失敗，已渲染模擬離線空間。");
-                loadFallbackMockGrid();
+                updateMapStatus(false, "離線狀態", "⚠️ 雲端地圖載入失敗，目前處於離線狀態。");
+                // 已依照需求移除離線模擬數據，載入失敗則不進行繪製
+                document.getElementById('loadingOverlay').innerHTML = `
+                    <div class="text-center p-6 space-y-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500 text-3xl"></i>
+                        <p class="text-sm font-semibold text-slate-700">雲端地圖加載失敗</p>
+                        <p class="text-xs text-slate-500">請確認您的網路連線或稍後再試。</p>
+                    </div>
+                `;
             }
         }
 
@@ -1171,7 +1364,7 @@
 
             cleanLocalCacheWithRemote();
             document.getElementById('loadingOverlay').classList.add('hidden');
-            updateMapStatus(true, "同步成功", "9F 自習室");
+            updateMapStatus(true, "同步成功", "9F 自習室實體地圖系統運作中");
             
             renderGridMap();
             calculateMapStatistics();
@@ -1209,16 +1402,24 @@
             return !!csvOccupiedSeats[seatId];
         }
 
+        function getSeatOccupantName(seatId) {
+            if (localCacheOccupied[seatId]) {
+                if (localCacheOccupied[seatId].status === 'occupied') return localCacheOccupied[seatId].name;
+                if (localCacheOccupied[seatId].status === 'free') return null;
+            }
+            return csvOccupiedSeats[seatId] || null;
+        }
+
         function updateMapStatus(isOnline, shortText, longText) {
             const dot = document.getElementById('statusDot');
             const text = document.getElementById('statusText');
             const msg = document.getElementById('mapStatusMessage');
             if (isOnline) {
-                dot.className = "w-2 h-2 rounded-full bg-emerald-400";
-                text.innerHTML = `地圖：<span class="text-emerald-400 font-bold">${shortText}</span>`;
+                if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+                if (text) text.innerHTML = `地圖：<span class="text-emerald-400 font-bold">${shortText}</span>`;
             } else {
-                dot.className = "w-2 h-2 rounded-full bg-rose-400 animate-pulse";
-                text.innerHTML = `地圖：<span class="text-rose-400 font-bold">${shortText}</span>`;
+                if (dot) dot.className = "w-2 h-2 rounded-full bg-rose-400 animate-pulse";
+                if (text) text.innerHTML = `地圖：<span class="text-rose-400 font-bold">${shortText}</span>`;
             }
             if (msg) msg.textContent = longText;
         }
@@ -1252,7 +1453,6 @@
             document.getElementById('statOccupied').textContent = occupied;
             document.getElementById('statUsageRate').textContent = rate;
 
-            // 首頁與大廳聯動 (解決非分頁狀態下的未取得問題)
             const homeRate = document.getElementById('home-seat-rate');
             const homeDesc = document.getElementById('home-seat-free-desc');
             const lobbyFree = document.getElementById('lobby-free-seats');
@@ -1261,30 +1461,34 @@
             if (homeDesc) homeDesc.innerText = `餘位 ${freeSeats} 席・在線人數同步中`;
             if (lobbyFree) lobbyFree.innerText = freeSeats;
 
-            // 檢查個人劃位狀態
             checkMySeatStatus();
         }
 
         function checkMySeatStatus() {
             let mySeatId = "未登記";
-            Object.keys(localCacheOccupied).forEach(seatId => {
-                if (localCacheOccupied[seatId].status === 'occupied' && localCacheOccupied[seatId].name.toLowerCase() === '林建華') {
-                    mySeatId = `9F - ${seatId}`;
-                }
-            });
-            document.getElementById('home-seat-badge').innerText = mySeatId;
+            if (currentUser) {
+                Object.keys(localCacheOccupied).forEach(seatId => {
+                    if (localCacheOccupied[seatId].status === 'occupied' && localCacheOccupied[seatId].name.toLowerCase() === currentUser.username.toLowerCase()) {
+                        mySeatId = `9F - ${seatId}`;
+                    }
+                });
+            }
+            const seatBadge = document.getElementById('home-seat-badge');
+            if (seatBadge) {
+                seatBadge.innerText = mySeatId;
+            }
         }
 
         function calculateLobbySeats() {
-            // 計算大廳座位數 (已與地圖同步，如未加載則使用預設值)
             const lobbyFree = document.getElementById('lobby-free-seats');
             if (lobbyFree && (lobbyFree.innerText === '--' || lobbyFree.innerText === '0')) {
-                lobbyFree.innerText = "124";
+                lobbyFree.innerText = "0"; // 移除預設 mock 124 席
             }
         }
 
         function renderGridMap() {
             const container = document.getElementById('seatGridContainer');
+            if (!container) return;
             container.innerHTML = '';
             container.style.gridTemplateColumns = `repeat(52, minmax(28px, 1fr))`;
 
@@ -1370,48 +1574,63 @@
             document.getElementById('seatGridContainer').style.transform = `scale(${zoomLevel})`;
         }
 
-        // Seat Modal
+        // Seat Modal (帶入 SSO 認證攔截)
         function openSeatModal(seatId, x, y, z) {
-            selectedCell = { seatId, x, y, z };
-            const modal = document.getElementById('seatModal');
-            const container = document.getElementById('seatModalContainer');
-            const badge = document.getElementById('modalSeatBadge');
-            const title = document.getElementById('modalSeatId');
-            const statusText = document.getElementById('modalStatusText');
-            const headerBg = document.getElementById('modalHeaderBg');
-            
-            document.getElementById('formSection').classList.add('hidden');
-            document.getElementById('detailsSection').classList.add('hidden');
-            toggleCancelForm(false);
+            guardAction(() => {
+                selectedCell = { seatId, x, y, z };
+                const modal = document.getElementById('seatModal');
+                const container = document.getElementById('seatModalContainer');
+                const badge = document.getElementById('modalSeatBadge');
+                const title = document.getElementById('modalSeatId');
+                const statusText = document.getElementById('modalStatusText');
+                const headerBg = document.getElementById('modalHeaderBg');
+                
+                document.getElementById('formSection').classList.add('hidden');
+                document.getElementById('detailsSection').classList.add('hidden');
+                toggleCancelForm(false);
 
-            title.textContent = `座位 ${seatId}`;
-            document.getElementById('modalCoords').textContent = `${x}, ${y}, ${z}`;
-            const isOccupied = checkSeatOccupied(seatId);
+                title.textContent = `座位 ${seatId}`;
+                document.getElementById('modalCoords').textContent = `${x}, ${y}, ${z}`;
+                const isOccupied = checkSeatOccupied(seatId);
 
-            if (seatId.startsWith('A')) {
-                badge.textContent = "一般單人席";
-                badge.className = "text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/10 border border-white/20";
-            } else {
-                badge.textContent = "筆電禁用座位";
-                badge.className = "text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-900/40 border border-blue-400/30 text-blue-100";
-            }
+                if (seatId.startsWith('A')) {
+                    badge.textContent = "一般單人席";
+                    badge.className = "text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/10 border border-white/20";
+                } else {
+                    badge.textContent = "筆電禁用座位";
+                    badge.className = "text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-900/40 border border-blue-400/30 text-blue-100";
+                }
 
-            if (isOccupied) {
-                headerBg.className = "bg-gradient-to-r from-slate-600 to-slate-700 text-white p-5 relative";
-                statusText.innerHTML = '<i class="fa-solid fa-user-lock"></i> 座位已被使用 (隱私保護中)';
-                document.getElementById('detailsSection').classList.remove('hidden');
-            } else {
-                headerBg.className = "bg-gradient-to-r from-nscu-green to-nscu-darkgreen text-white p-5 relative";
-                statusText.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-300"></i> 空閒開放登記中';
-                document.getElementById('formSection').classList.remove('hidden');
-                document.getElementById('regName').value = '林建華'; // 預填登入者
-            }
+                if (isOccupied) {
+                    headerBg.className = "bg-gradient-to-r from-slate-600 to-slate-700 text-white p-5 relative";
+                    statusText.innerHTML = '<i class="fa-solid fa-user-lock"></i> 座位已被使用 (隱私保護中)';
+                    document.getElementById('detailsSection').classList.remove('hidden');
+                    
+                    // 禁用退座身分輸入框，因為我們會自動比對當前登入玩家
+                    const cancelInput = document.getElementById('cancelNameInput');
+                    if (cancelInput) {
+                        cancelInput.value = currentUser.username;
+                        cancelInput.disabled = true;
+                    }
+                } else {
+                    headerBg.className = "bg-gradient-to-r from-nscu-green to-nscu-darkgreen text-white p-5 relative";
+                    statusText.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-300"></i> 空閒開放登記中';
+                    document.getElementById('formSection').classList.remove('hidden');
+                    
+                    // 自動帶入當前登入玩家 ID，並將輸入欄設定為 disabled 防止修改
+                    const regInput = document.getElementById('regName');
+                    if (regInput) {
+                        regInput.value = currentUser.username;
+                        regInput.disabled = true;
+                    }
+                }
 
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.replace('opacity-0', 'opacity-100');
-                container.classList.replace('scale-95', 'scale-100');
-            }, 10);
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.replace('opacity-0', 'opacity-100');
+                    container.classList.replace('scale-95', 'scale-100');
+                }, 10);
+            });
         }
 
         function closeSeatModal() {
@@ -1441,7 +1660,7 @@
             if (!selectedCell) return;
             const mcId = document.getElementById('regName').value.trim();
             if (!mcId) {
-                showToast("⚠️ 請輸入您的 Minecraft ID！", "warning");
+                showToast("⚠️ 請先登入您的 Minecraft 帳號！", "warning");
                 return;
             }
 
@@ -1456,7 +1675,7 @@
             renderGridMap();
             calculateMapStatistics();
 
-            // 虛擬觸發 Apps Script 背景發送
+            // 異步 Apps Script 背景上傳
             fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -1469,12 +1688,16 @@
             if (!selectedCell) return;
             const inputMcId = document.getElementById('cancelNameInput').value.trim();
             if (!inputMcId) {
-                showToast("⚠️ 請輸入您登記時的 Minecraft ID！", "warning");
+                showToast("⚠️ 驗證玩家身分失敗！", "warning");
                 return;
             }
 
-            if (inputMcId.toLowerCase() !== '林建華' && inputMcId.toLowerCase() !== (csvOccupiedSeats[selectedCell.seatId] || "").toLowerCase()) {
-                showToast("❌ 身分驗證失敗！非登記本人不可結束佔用。", "error");
+            const currentOccupant = getSeatOccupantName(selectedCell.seatId);
+            
+            // 驗證是否為預約玩家本人
+            if (currentUser.username.toLowerCase() !== inputMcId.toLowerCase() || 
+                (currentOccupant && currentOccupant.toLowerCase() !== currentUser.username.toLowerCase())) {
+                showToast("❌ 身分驗證失敗！您無權限退還此座位。", "error");
                 return;
             }
 
@@ -1484,12 +1707,11 @@
                 time: new Date().getTime()
             };
             localStorage.setItem('NSCU_LOCAL_OCCUPIED_SEATS', JSON.stringify(localCacheOccupied));
-            showToast(`🧹 座位 ${selectedCell.seatId} 已順利恢復空閒。`);
+            showToast(`🧹 座位 ${selectedCell.seatId} 已恢復空閒。`);
             closeSeatModal();
             renderGridMap();
             calculateMapStatistics();
 
-            // 背景向 Apps Script 遞交退還
             fetch(`${APPS_SCRIPT_URL}?action=cancel&seatId=${encodeURIComponent(selectedCell.seatId)}&minecraftId=${encodeURIComponent(inputMcId)}`).catch(() => {});
         }
 
@@ -1502,28 +1724,8 @@
             });
         }
 
-        function loadFallbackMockGrid() {
-            const dummyRows = [];
-            for (let r = 0; r < 77; r++) {
-                const cols = [];
-                for (let c = 0; c < 52; c++) {
-                    if (r === 0 || r === 76 || c === 0 || c === 51) {
-                        cols.push("L");
-                    } else if ((r === 10 || r === 30 || r === 50) && (c >= 10 && c <= 40)) {
-                        cols.push("T");
-                    } else if (r % 5 === 2 && c % 4 === 2) {
-                        cols.push(`A${r * 100 + c}`);
-                    } else {
-                        cols.push("");
-                    }
-                }
-                dummyRows.push(cols);
-            }
-            processCSVGrid(dummyRows);
-        }
-
         // ==========================================
-        // 4. 圖書檢索系統與對接 (database.html)
+        // 5. 圖書檢索系統與對接 (database.html)
         // ==========================================
         async function loadLibraryDatabase() {
             try {
@@ -1531,7 +1733,7 @@
                     fetch(CATEGORIES_CSV_URL),
                     fetch(BOOKS_CSV_URL)
                 ]);
-                if (!catRes.ok || !booksRes.ok) throw new Error("CORS or Connection Error");
+                if (!catRes.ok || !booksRes.ok) throw new Error("Connection Error");
 
                 const catCsvText = await catRes.text();
                 const booksCsvText = await booksRes.text();
@@ -1543,8 +1745,17 @@
                 calculateDatabaseStatistics();
                 applyFilters();
             } catch (error) {
-                console.warn("無法取得遠端書籍資料，載入本地預設離線精選圖書資源！");
-                loadFallbackBooks();
+                console.warn("無法取得遠端書籍資料");
+                // 移除原先 Mock 預設書籍
+                const grid = document.getElementById('booksGrid');
+                if (grid) {
+                    grid.innerHTML = `
+                        <div class="col-span-full py-16 flex flex-col items-center justify-center text-slate-400 gap-4">
+                            <i class="fa-solid fa-triangle-exclamation text-3xl text-amber-500"></i>
+                            <span class="text-sm font-medium">⚠️ 無法載入館藏資料，請檢查網路狀態。</span>
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -1573,6 +1784,7 @@
 
         function buildCategoryFilter() {
             const select = document.getElementById('categoryFilter');
+            if (!select) return;
             select.innerHTML = '<option value="ALL">所有學科分類</option>';
             categoriesData.forEach(cat => {
                 const opt = document.createElement('option');
@@ -1584,19 +1796,15 @@
 
         function calculateDatabaseStatistics() {
             const total = booksData.length;
-            const borrowedCount = myBorrowedBooks.length;
-            
-            // 模擬動態在架計算：剔除被個人借出的
             const available = booksData.filter(b => !myBorrowedBooks.some(m => m.id === b.id)).length;
             const checkedOut = total - available;
-            const rate = total > 0 ? ((checkedOut / total) * 100).toFixed(1) + '%' : '12.4%';
+            const rate = total > 0 ? ((checkedOut / total) * 100).toFixed(1) + '%' : '0.0%';
 
             document.getElementById('totalBooks').textContent = total;
             document.getElementById('availableBooks').textContent = available;
             document.getElementById('checkedOutBooks').textContent = checkedOut;
             document.getElementById('borrowRate').textContent = rate;
 
-            // 同步與渲染首頁的【書籍出借率】與動態指標敘述 (解決未點開分頁無法取得的問題)
             const homeBorrowRate = document.getElementById('home-borrow-rate');
             const homeBorrowDesc = document.getElementById('home-borrow-desc');
             
@@ -1608,6 +1816,7 @@
 
         function renderBooks(data) {
             const grid = document.getElementById('booksGrid');
+            if (!grid) return;
             grid.innerHTML = '';
 
             if (data.length === 0) {
@@ -1694,11 +1903,9 @@
             document.getElementById('modalBookId').textContent = book.id;
             document.getElementById('modalISBN').textContent = book.isbn ? `ISBN: ${book.isbn}` : 'ISBN: 暫無';
 
-            // 座標格式
             const rawLocation = book.location ? book.location.trim() : '未標記';
             document.getElementById('modalLocationDisplay').textContent = rawLocation !== '未標記' ? rawLocation.replace(/\\/g, ', ') : '未標記';
 
-            // 狀態與操作按鈕渲染
             const isBorrowedByMe = myBorrowedBooks.some(b => b.id === book.id);
             const isAvailable = !isBorrowedByMe && (book.status === '在架上' || book.status === '在館中');
             const statusEl = document.getElementById('modalStatus');
@@ -1749,31 +1956,35 @@
         }
 
         function executeModalBorrowReturn() {
-            if (!activeModalBook) return;
-            const isBorrowedByMe = myBorrowedBooks.some(b => b.id === activeModalBook.id);
-            if (isBorrowedByMe) {
-                returnBook(activeModalBook.id);
-            } else {
-                borrowBook(activeModalBook.id);
-            }
-            closeModal();
+            guardAction(() => {
+                if (!activeModalBook) return;
+                const isBorrowedByMe = myBorrowedBooks.some(b => b.id === activeModalBook.id);
+                if (isBorrowedByMe) {
+                    returnBook(activeModalBook.id);
+                } else {
+                    borrowBook(activeModalBook.id);
+                }
+                closeModal();
+            });
         }
 
         // ==========================================
-        // 5. 借還書系統核心邏輯 (barb.html)
+        // 6. 借還書系統核心邏輯 (barb.html)
         // ==========================================
         function handleBarbAction(action) {
-            const inputVal = document.getElementById('barb-input-id').value.trim();
-            if (!inputVal) {
-                showToast("⚠️ 請輸入或點選索書號！", "warning");
-                return;
-            }
-            if (action === 'borrow') {
-                borrowBook(inputVal);
-            } else {
-                returnBook(inputVal);
-            }
-            document.getElementById('barb-input-id').value = "";
+            guardAction(() => {
+                const inputVal = document.getElementById('barb-input-id').value.trim();
+                if (!inputVal) {
+                    showToast("⚠️ 請輸入或點選索書號！", "warning");
+                    return;
+                }
+                if (action === 'borrow') {
+                    borrowBook(inputVal);
+                } else {
+                    returnBook(inputVal);
+                }
+                document.getElementById('barb-input-id').value = "";
+            });
         }
 
         function borrowBook(bookId) {
@@ -1789,7 +2000,7 @@
 
             const today = new Date();
             const returnDate = new Date();
-            returnDate.setDate(today.getDate() + 14);
+            returnDate.setDate(today.getDate() + 30); // 延長為 30 天期
 
             myBorrowedBooks.push({
                 id: book.id,
@@ -1817,14 +2028,11 @@
         }
 
         function syncGlobalLibraryState() {
-            // 更新虛擬借閱證列表
             renderMyBorrowedList();
             
-            // 更新首頁指標
             const badge1 = document.getElementById('home-borrow-badge');
             if (badge1) badge1.innerText = myBorrowedBooks.length;
             
-            // 重新計算與過濾檢索
             calculateDatabaseStatistics();
             if (document.getElementById('view-database').classList.contains('block')) {
                 applyFilters();
@@ -1834,6 +2042,7 @@
 
         function renderMyBorrowedList() {
             const container = document.getElementById('my-books-borrowed-container');
+            if (!container) return;
             if (myBorrowedBooks.length === 0) {
                 container.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs">目前暫無借閱中的圖書</div>`;
                 return;
@@ -1855,11 +2064,11 @@
 
         function renderBarbQuickList() {
             const container = document.getElementById('barb-quick-list');
+            if (!container) return;
             if (booksData.length === 0) {
-                container.innerHTML = `<div class="text-xs text-slate-400">正在加載可借閱清單...</div>`;
+                container.innerHTML = `<div class="text-xs text-slate-400">連線異常或資料載入中...</div>`;
                 return;
             }
-            // 挑選幾款當前在架圖書供便捷借書
             const available = booksData.filter(b => !myBorrowedBooks.some(m => m.id === b.id)).slice(0, 4);
             let html = "";
             available.forEach(b => {
@@ -1875,7 +2084,7 @@
         }
 
         // ==========================================
-        // 6. CSV 讀取與首頁公告對接 (index.html 核心)
+        // 7. CSV 讀取與首頁公告對接
         // ==========================================
         async function fetchHomeSheetData() {
             const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS01kcFvbXs1L6e_V3jInI4VB5pISZMPuz3mxTWUXQWv7Y4la2NbQxWz6i7tZ5czBgdvBI83A4jIwmc/pub?output=csv&gid=248986281";
@@ -1912,8 +2121,17 @@
                 renderGuides(guides);
                 renderOpeningHours(openingHours);
             } catch (error) {
-                console.warn("無法加載首頁雲端資料，使用本地預設公告與指南：", error);
-                renderDefaultHomeData();
+                console.warn("無法加載首頁雲端資料");
+                // 移除原先 Mock 模擬資料，只在首頁提示連線異常
+                document.getElementById('announcement-container').innerHTML = `
+                    <div class="text-slate-500 text-xs p-4 text-center">⚠️ 雲端公告載入失敗，請確認網路狀態。</div>
+                `;
+                document.getElementById('guides-container').innerHTML = `
+                    <div class="text-slate-500 text-xs p-4 text-center col-span-2">⚠️ 指南載入失敗，請確認網路狀態。</div>
+                `;
+                document.getElementById('hot-books-container').innerHTML = `
+                    <div class="text-slate-500 text-xs p-4 text-center">⚠️ 借閱排行榜載入失敗。</div>
+                `;
             }
         }
 
@@ -1942,6 +2160,7 @@
 
         function renderAnnouncements(list) {
             const container = document.getElementById('announcement-container');
+            if (!container) return;
             if (list.length === 0) {
                 container.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs">目前暫無最新公告</div>`;
                 return;
@@ -1971,6 +2190,7 @@
 
         function renderHotBooks(list) {
             const container = document.getElementById('hot-books-container');
+            if (!container) return;
             if (list.length === 0) {
                 container.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs">目前暫無排行榜資料</div>`;
                 return;
@@ -1993,6 +2213,7 @@
 
         function renderGuides(list) {
             const container = document.getElementById('guides-container');
+            if (!container) return;
             if (list.length === 0) {
                 container.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs">暫無使用指南</div>`;
                 return;
@@ -2018,7 +2239,7 @@
         function getTodayOpeningInfo(list) {
             if (!list || list.length === 0) return null;
             const now = new Date();
-            const day = now.getDay(); // 0(日)-6(六)
+            const day = now.getDay();
             const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
             const dayFullNames = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
             
@@ -2105,45 +2326,6 @@
             }
         }
 
-        function renderDefaultHomeData() {
-            const defaultAnnouncements = [
-                { date: "2026 / 06 / 15", title: "期末考週 24 小時自習室開放與供電公告", content: "自習室全區提供定時冷氣、穩定無線網路。請留意貴重物品保管。" },
-                { date: "2026 / 06 / 10", title: "IEEE Xplore 學術期刊資料庫連線效能升級", content: "電子資源中心已完成專屬頻寬對接，論文下載延遲降低 80%。" }
-            ];
-            const defaultHotBooks = [
-                { title: "數位網絡安全與攻防實務", borrows: "128" },
-                { title: "系統架構與分散式運算", borrows: "94" }
-            ];
-            const defaultGuides = [
-                { title: "個人席位極簡預約", content: "全區自習席位皆配備感應 QR 碼，現場掃描即可入座登記。" },
-                { title: "跨校聯盟借閱合作", content: "憑虛擬閱覽證即可申請跨校聯盟圖書館閱覽與圖書外借。" }
-            ];
-            const defaultOpening = [
-                { days: "週一 至 週五", hours: "08:00 - 22:30" },
-                { days: "週六 至 週日", hours: "09:00 - 22:00" }
-            ];
-            announcementsData = defaultAnnouncements;
-            renderAnnouncements(defaultAnnouncements);
-            renderHotBooks(defaultHotBooks);
-            renderGuides(defaultGuides);
-            renderOpeningHours(defaultOpening);
-        }
-
-        function loadFallbackBooks() {
-            booksData = [
-                { id: "9-A101", title: "數位網絡安全與攻防實務", author: "Bob Kao", category: "資訊工程", sub_category: "網絡安全", location: "-1110\\118\\835", description: "本書深入剖析當代數位網絡面臨的安全威脅、滲透測試技巧以及主動攻防策略實踐。", status: "在架上", isbn: "978-986-1234-56-1" },
-                { id: "9-A103", title: "系統架構與分散式運算", author: "Jerry Chen", category: "資訊工程", sub_category: "分散式系統", location: "-1105\\118\\840", description: "探討分散式架構下的高併發、高可用機制，並結合紅石電路邏輯原理進行系統性模型建置指南。", status: "在架上", isbn: "978-986-9876-54-3" },
-                { id: "9-B105", title: "人工智慧：現代方法 (第四版)", author: "Stuart Russell", category: "人工智慧", sub_category: "機器學習", location: "-1120\\118\\828", description: "公認最權威、最經典的AI教科書，完整涵蓋深度學習、強化學習與神經網路的數學原理與實務。", status: "在架上", isbn: "978-986-5555-11-2" }
-            ];
-            categoriesData = [
-                { code: "000", name: "資訊工程", floor: "9F" },
-                { code: "100", name: "人工智慧", floor: "9F" }
-            ];
-            buildCategoryFilter();
-            calculateDatabaseStatistics();
-            applyFilters();
-        }
-
         // 當點擊 Modal 外部時關閉
         window.addEventListener('click', (e) => {
             if (e.target === document.getElementById('bookModal')) closeModal();
@@ -2174,25 +2356,28 @@
         }
 
         function showSimulationToast(spaceName) {
-            showToast(`⚙️ [虛擬預約] 成功提交 ${spaceName} 的預約申請！`, "success");
+            showToast(`⚙️ [預約成功] 成功提交 ${spaceName} 的預約申請！`, "success");
         }
 
         // ==========================================
-        // 7. 初始化程序與背景載入
+        // 8. 初始化程序與背景載入
         // ==========================================
-        window.onload = function() {
+        window.onload = async function() {
             lucide.createIcons();
             
-            // 1. 立即載入 Google Sheets 首頁配置 (公告、指南、開館時間)
+            // 1. 優先處理 SSO 認證，這會決定是否更新 profile 資訊
+            await handleSSOAuth();
+            
+            // 2. 載入 Google Sheets 首頁配置 (公告、指南、開館時間)
             fetchHomeSheetData();
             
-            // 2. 立即背景載入圖書資料庫 (計算並呈現出借率，不需等待點擊分頁)
+            // 3. 背景載入圖書資料庫 (計算並呈現出借率，不需等待點擊分頁)
             loadLibraryDatabase();
 
-            // 3. 立即背景載入自習室地圖資料 (計算並呈現座位使用率，不需等待進入地圖)
+            // 4. 背景載入自習室地圖資料 (計算並呈現座位使用率)
             loadMapData();
             
-            // 4. 初始化個人借閱明細與狀態同步
+            // 5. 初始化個人借閱明細與狀態同步
             syncGlobalLibraryState();
         }
     </script>
