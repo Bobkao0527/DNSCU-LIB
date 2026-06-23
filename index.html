@@ -1395,11 +1395,288 @@
                 }
             });
         }
-
         function changeZoom(delta) {
             zoomLevel = Math.max(0.3, Math.min(1.8, zoomLevel + delta));
             document.getElementById('zoomPercent').textContent = `${Math.round(zoomLevel * 100)}%`;
             document.getElementById('seatGridContainer').style.transform = `scale(${zoomLevel})`;
+        }
+        function openSeatModal(seatId, x, y, z) {
+            guardAction(() => {
+                selectedCell = { seatId, x, y, z };
+                const modal = document.getElementById('seatModal');
+                const container = document.getElementById('seatModalContainer');
+                const badge = document.getElementById('modalSeatBadge');
+                const title = document.getElementById('modalSeatId');
+                const statusText = document.getElementById('modalStatusText');
+                const headerBg = document.getElementById('modalHeaderBg');
+                
+                document.getElementById('formSection').classList.add('hidden');
+                document.getElementById('detailsSection').classList.add('hidden');
+                toggleCancelForm(false);
+
+                title.textContent = `座位 ${seatId}`;
+                document.getElementById('modalCoords').textContent = `${x}, ${y}, ${z}`;
+                const isOccupied = checkSeatOccupied(seatId);
+
+                if (seatId.startsWith('A')) {
+                    badge.textContent = "一般單人席";
+                    badge.className = "text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/10 border border-white/20";
+                } else {
+                    badge.textContent = "筆電禁用座位";
+                    badge.className = "text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-900/40 border border-blue-400/30 text-blue-100";
+                }
+
+                if (isOccupied) {
+                    headerBg.className = "bg-gradient-to-r from-slate-600 to-slate-700 text-white p-5 relative";
+                    statusText.innerHTML = '<i class="fa-solid fa-user-lock"></i> 座位已被使用 (隱私保護中)';
+                    document.getElementById('detailsSection').classList.remove('hidden');
+                    
+                    // 禁用退座身分輸入框，因為我們會自動比對當前登入玩家
+                    const cancelInput = document.getElementById('cancelNameInput');
+                    if (cancelInput) {
+                        cancelInput.value = currentUser.username;
+                        cancelInput.disabled = true;
+                    }
+                } else {
+                    headerBg.className = "bg-gradient-to-r from-nscu-green to-nscu-darkgreen text-white p-5 relative";
+                    statusText.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-300"></i> 空閒開放登記中';
+                    document.getElementById('formSection').classList.remove('hidden');
+                    
+                    // 自動帶入當前登入玩家 ID，並將輸入欄設定為 disabled 防止修改
+                    const regInput = document.getElementById('regName');
+                    if (regInput) {
+                        regInput.value = currentUser.username;
+                        regInput.disabled = true;
+                    }
+                }
+
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.replace('opacity-0', 'opacity-100');
+                    container.classList.replace('scale-95', 'scale-100');
+                }, 10);
+            });
+        }
+
+        function closeSeatModal() {
+            const modal = document.getElementById('seatModal');
+            const container = document.getElementById('seatModalContainer');
+            modal.classList.replace('opacity-100', 'opacity-0');
+            container.classList.replace('scale-100', 'scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                selectedCell = null;
+            }, 150);
+        }
+
+        function toggleCancelForm(show) {
+            const btn = document.getElementById('showCancelFormBtn');
+            const inputArea = document.getElementById('cancelFormInput');
+            if (show) {
+                btn.classList.add('hidden');
+                inputArea.classList.remove('hidden');
+            } else {
+                btn.classList.remove('hidden');
+                inputArea.classList.add('hidden');
+            }
+        }
+
+        async function saveRegistration() {
+            if (!selectedCell) return;
+            const mcId = document.getElementById('regName').value.trim();
+            if (!mcId) {
+                showToast("⚠️ 請先登入您的 Minecraft 帳號！", "warning");
+                return;
+            }
+
+            localCacheOccupied[selectedCell.seatId] = {
+                status: 'occupied',
+                name: mcId,
+                time: new Date().getTime()
+            };
+            localStorage.setItem('NSCU_LOCAL_OCCUPIED_SEATS', JSON.stringify(localCacheOccupied));
+            showToast(`🎉 成功登記座位 ${selectedCell.seatId}！`);
+            closeSeatModal();
+            renderGridMap();
+            calculateMapStatistics();
+
+            // 異步 Apps Script 背景上傳
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ seatId: selectedCell.seatId, minecraftId: mcId, action: 'register' })
+            }).catch(() => {});
+        }
+
+        async function confirmCancelRegistration() {
+            if (!selectedCell) return;
+            const inputMcId = document.getElementById('cancelNameInput').value.trim();
+            if (!inputMcId) {
+                showToast("⚠️ 驗證玩家身分失敗！", "warning");
+                return;
+            }
+
+            const currentOccupant = getSeatOccupantName(selectedCell.seatId);
+            
+            // 驗證是否為預約玩家本人
+            if (currentUser.username.toLowerCase() !== inputMcId.toLowerCase() || 
+                (currentOccupant && currentOccupant.toLowerCase() !== currentUser.username.toLowerCase())) {
+                showToast("❌ 身分驗證失敗！您無權限退還此座位。", "error");
+                return;
+            }
+
+            localCacheOccupied[selectedCell.seatId] = {
+                status: 'free',
+                name: '',
+                time: new Date().getTime()
+            };
+            localStorage.setItem('NSCU_LOCAL_OCCUPIED_SEATS', JSON.stringify(localCacheOccupied));
+            showToast(`🧹 座位 ${selectedCell.seatId} 已恢復空閒。`);
+            closeSeatModal();
+            renderGridMap();
+            calculateMapStatistics();
+
+            fetch(`${APPS_SCRIPT_URL}?action=cancel&seatId=${encodeURIComponent(selectedCell.seatId)}&minecraftId=${encodeURIComponent(inputMcId)}`).catch(() => {});
+        }
+
+        function copyMinecraftAction(type) {
+            if (!selectedCell) return;
+            const { x, y, z } = selectedCell;
+            const textToCopy = type === 'tp' ? `/tp @s ${x} ${y} ${z}` : `${x} ${y} ${z}`;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast(`📋 已複製：${textToCopy}`);
+            });
+        }
+
+        function normalizeCategories(rawList) {
+            return rawList.map(row => ({
+                code: (row['code'] || row['分類代碼'] || '').trim(),
+                name: (row['name'] || row['分類名稱'] || '').trim(),
+                floor: (row['floor'] || row['放置樓層'] || '').trim(),
+            })).filter(cat => cat.code && cat.name);
+        }
+
+        function normalizeBooks(rawList) {
+            return rawList.map(row => ({
+                id: (row['索書號'] || row['id'] || '').trim(),
+                title: (row['書名'] || row['title'] || '').trim(),
+                author: (row['作者'] || row['author'] || '').trim(),
+                recorder: (row['引入'] || row['recorder'] || '').trim(),
+                category: (row['主分類'] || row['category'] || '').trim(),
+                sub_category: (row['細部分類'] || row['sub_category'] || '').trim(),
+                location: (row['位置'] || row['location'] || '').trim(),
+                description: (row['簡介'] || row['description'] || '').trim(),
+                status: (row['狀態'] || row['status'] || '').trim(),
+                isbn: (row['DS-ISBN'] || row['isbn'] || row['ISBN'] || '').trim()
+            })).filter(book => book.id && book.title);
+        }
+
+        function buildCategoryFilter() {
+            const select = document.getElementById('categoryFilter');
+            if (!select) return;
+            select.innerHTML = '<option value="ALL">所有學科分類</option>';
+            categoriesData.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.name;
+                opt.textContent = `${cat.code} ${cat.name} (${cat.floor})`;
+                select.appendChild(opt);
+            });
+        }
+
+        function calculateDatabaseStatistics() {
+            const total = booksData.length;
+            const available = booksData.filter(b => !myBorrowedBooks.some(m => m.id === b.id)).length;
+            const checkedOut = total - available;
+            const rate = total > 0 ? ((checkedOut / total) * 100).toFixed(1) + '%' : '0.0%';
+
+            document.getElementById('totalBooks').textContent = total;
+            document.getElementById('availableBooks').textContent = available;
+            document.getElementById('checkedOutBooks').textContent = checkedOut;
+            document.getElementById('borrowRate').textContent = rate;
+
+            const homeBorrowRate = document.getElementById('home-borrow-rate');
+            const homeBorrowDesc = document.getElementById('home-borrow-desc');
+            
+            if (homeBorrowRate) homeBorrowRate.textContent = rate;
+            if (homeBorrowDesc) {
+                homeBorrowDesc.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>已借出 ${checkedOut} 冊 / 共 ${total} 冊`;
+            }
+        }
+
+        function renderBooks(data) {
+            const grid = document.getElementById('booksGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            if (data.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400">沒有尋找到符合篩選條件的書籍。</div>`;
+                return;
+            }
+
+            data.forEach(book => {
+                const isBorrowedByMe = myBorrowedBooks.some(b => b.id === book.id);
+                const isAvailable = !isBorrowedByMe && (book.status === '在架上' || book.status === '在館中');
+                const statusClass = isAvailable ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100';
+
+                const card = document.createElement('div');
+                card.className = 'book-card bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between cursor-pointer shadow-sm relative group';
+                card.onclick = () => openBookModal(book);
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start gap-4 mb-3">
+                            <span class="text-[11px] font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full border border-slate-200/60 max-w-[85%] truncate">
+                                ${book.category || '未分類'} ${book.sub_category ? '· ' + book.sub_category : ''}
+                            </span>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 leading-snug mb-1 group-hover:text-nscu-500 transition-colors line-clamp-2">${book.title}</h3>
+                        <div class="text-xs text-slate-500 mb-4">著者：${book.author || '未知著者'}</div>
+                        <p class="text-xs text-slate-600 leading-relaxed bg-slate-50/75 rounded-lg p-3 border border-slate-100/50 mb-4 line-clamp-3">
+                            ${book.description || '暫無此圖書的詳細簡介，歡迎入館參閱實體書庫。'}
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100 space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="px-2 py-0.5 rounded-full border font-semibold text-[10px] ${statusClass}">
+                                ${isAvailable ? '在架上' : '借閱中'}
+                            </span>
+                            <span class="text-slate-400 font-mono text-[10px]">${book.id}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const category = document.getElementById('categoryFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            const filtered = booksData.filter(book => {
+                const matchesSearch = book.title.toLowerCase().includes(query) || book.author.toLowerCase().includes(query) || book.id.toLowerCase().includes(query);
+                const matchesCategory = (category === 'ALL' || book.category === category);
+                
+                const isBorrowedByMe = myBorrowedBooks.some(b => b.id === book.id);
+                const isAvailable = !isBorrowedByMe && (book.status === '在架上' || book.status === '在館中');
+                
+                let matchesStatus = true;
+                if (status === '在架上') matchesStatus = isAvailable;
+                if (status === '借閱中') matchesStatus = !isAvailable;
+
+                return matchesSearch && matchesCategory && matchesStatus;
+            });
+
+            renderBooks(filtered);
+            document.getElementById('searchFeedback').innerHTML = `檢索完成：共尋獲 <strong class="text-nscu-green">${filtered.length}</strong> 本符合條件之館藏`;
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = 'ALL';
+            document.getElementById('statusFilter').value = 'ALL';
+            applyFilters();
         }
 
         // ==========================================
