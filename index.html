@@ -866,10 +866,6 @@
         // SSO 與 Google Apps Script 端點
         const SSO_PORTAL_URL = "https://dolphinloginsystem.pages.dev";
         const SSO_VERIFY_API = "https://dolphinloginsystem.pages.dev/api/verify";
-        
-        // =========================================================
-        // 【新增】存放使用者借閱清單的 Google Apps Script 網址
-        // =========================================================
         const USER_DB_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbytCpjFL-42ffcPK5OHmGHVS1oc2cWwuumFwoZenKMTFSPxoQhkHN6OJtoolpU1_6zy/exec";
 
         let booksData = [];
@@ -1179,10 +1175,20 @@
             lucide.createIcons();
         }
 
-        // --- 空間地圖部分 (略) ---
-        function enterSelfStudyMap() { document.getElementById('booking-lobby').classList.add('hidden'); document.getElementById('booking-selfstudy').classList.remove('hidden'); loadMapData(); }
-        function backToBookingLobby() { document.getElementById('booking-selfstudy').classList.add('hidden'); document.getElementById('booking-lobby').classList.remove('hidden'); }
-        function bookGroupSpace(spaceName) { guardAction(() => { showSimulationToast(spaceName); }); }
+        function enterSelfStudyMap() {
+            document.getElementById('booking-lobby').classList.add('hidden');
+            document.getElementById('booking-selfstudy').classList.remove('hidden');
+            loadMapData();
+        }
+        function backToBookingLobby() {
+            document.getElementById('booking-selfstudy').classList.add('hidden');
+            document.getElementById('booking-lobby').classList.remove('hidden');
+        }
+        function bookGroupSpace(spaceName) {
+            guardAction(() => {
+                showSimulationToast(spaceName);
+            });
+        }
         
         async function loadMapData() {
             try {
@@ -1221,13 +1227,180 @@
             updateMapStatus(true, "同步成功", "9F 自習室實體地圖系統運作中");
             renderGridMap(); calculateMapStatistics();
         }
-        function cleanLocalCacheWithRemote() { /* ... */ }
-        function checkSeatOccupied(seatId) { return !!csvOccupiedSeats[seatId]; }
-        function calculateMapStatistics() { /* ... */ }
-        function checkMySeatStatus() { /* ... */ }
-        function calculateLobbySeats() { /* ... */ }
-        function renderGridMap() { /* ... */ }
-        function changeZoom(delta) { /* ... */ }
+        function cleanLocalCacheWithRemote() {
+            let changed = false;
+            Object.keys(localCacheOccupied).forEach(seatId => {
+                const cacheObj = localCacheOccupied[seatId];
+                const isRemoteOccupied = !!csvOccupiedSeats[seatId];
+                const remoteOwner = csvOccupiedSeats[seatId] || "";
+
+                if (cacheObj.status === 'occupied') {
+                    if (isRemoteOccupied && remoteOwner.toLowerCase() === cacheObj.name.toLowerCase()) {
+                        delete localCacheOccupied[seatId];
+                        changed = true;
+                    }
+                } else if (cacheObj.status === 'free') {
+                    if (!isRemoteOccupied) {
+                        delete localCacheOccupied[seatId];
+                        changed = true;
+                    }
+                }
+            });
+            if (changed) {
+                localStorage.setItem('NSCU_LOCAL_OCCUPIED_SEATS', JSON.stringify(localCacheOccupied));
+            }
+        }
+        function checkSeatOccupied(seatId) {
+            if (localCacheOccupied[seatId]) {
+                if (localCacheOccupied[seatId].status === 'occupied') return true;
+                if (localCacheOccupied[seatId].status === 'free') return false;
+            }
+            return !!csvOccupiedSeats[seatId];
+        }
+        function calculateMapStatistics() {
+            let totalSeats = 0;
+            let availableA = 0;
+            let availableB = 0;
+            let occupied = 0;
+
+            gridMatrix.forEach(row => {
+                row.forEach(cell => {
+                    if (!cell || cell === 'T' || cell === 'L') return;
+                    totalSeats++;
+                    const isOccupied = checkSeatOccupied(cell);
+                    if (isOccupied) {
+                        occupied++;
+                    } else {
+                        if (cell.startsWith('A')) availableA++;
+                        if (cell.startsWith('B')) availableB++;
+                    }
+                });
+            });
+
+            const freeSeats = availableA + availableB;
+            const rate = totalSeats > 0 ? ((occupied / totalSeats) * 100).toFixed(1) : '0.0';
+
+            document.getElementById('statTotal').textContent = totalSeats;
+            document.getElementById('statTypeA').textContent = availableA;
+            document.getElementById('statTypeB').textContent = availableB;
+            document.getElementById('statOccupied').textContent = occupied;
+            document.getElementById('statUsageRate').textContent = rate;
+
+            const homeRate = document.getElementById('home-seat-rate');
+            const homeDesc = document.getElementById('home-seat-free-desc');
+            const lobbyFree = document.getElementById('lobby-free-seats');
+            
+            if (homeRate) homeRate.innerText = rate;
+            if (homeDesc) homeDesc.innerText = `餘位 ${freeSeats} 席・在線人數同步中`;
+            if (lobbyFree) lobbyFree.innerText = freeSeats;
+
+            checkMySeatStatus();
+        }
+        function checkMySeatStatus() {
+            let mySeatId = "未登記";
+            if (currentUser) {
+                Object.keys(localCacheOccupied).forEach(seatId => {
+                    if (localCacheOccupied[seatId].status === 'occupied' && localCacheOccupied[seatId].name.toLowerCase() === currentUser.username.toLowerCase()) {
+                        mySeatId = `9F - ${seatId}`;
+                    }
+                });
+            }
+            const seatBadge = document.getElementById('home-seat-badge');
+            if (seatBadge) {
+                seatBadge.innerText = mySeatId;
+            }
+        }
+        function calculateLobbySeats() {
+            const lobbyFree = document.getElementById('lobby-free-seats');
+            if (lobbyFree && (lobbyFree.innerText === '--' || lobbyFree.innerText === '0')) {
+                lobbyFree.innerText = "0"; // 移除預設 mock 124 席
+            }
+        }
+        function renderGridMap() {
+            const container = document.getElementById('seatGridContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(52, minmax(28px, 1fr))`;
+
+            const fragment = document.createDocumentFragment();
+
+            gridMatrix.forEach((row, rIndex) => {
+                row.forEach((cell, cIndex) => {
+                    const blockX = BASE_X + cIndex;
+                    const blockY = BASE_Y;
+                    const blockZ = BASE_Z + rIndex;
+
+                    const cellEl = document.createElement('div');
+                    cellEl.className = "grid-cell rounded-[3px] flex flex-col items-center justify-center text-[8px] font-bold select-none relative ";
+                    
+                    if (!cell) {
+                        cellEl.className += "bg-slate-100/10 border border-dashed border-slate-200/20 text-transparent";
+                    } else if (cell === 'T') {
+                        cellEl.className += "bg-nscu-table border border-amber-950/40 cursor-default";
+                    } else if (cell === 'L') {
+                        cellEl.className += "bg-nscu-lobby border border-black/40 cursor-default";
+                    } else {
+                        cellEl.dataset.seatId = cell;
+                        cellEl.dataset.x = blockX;
+                        cellEl.dataset.y = blockY;
+                        cellEl.dataset.z = blockZ;
+
+                        const isOccupied = checkSeatOccupied(cell);
+                        let typeClass = "";
+
+                        if (isOccupied) {
+                            typeClass = "bg-slate-200 border border-slate-300 text-slate-500 hover:bg-slate-300 cursor-pointer shadow-sm";
+                        } else {
+                            if (cell.startsWith('A')) {
+                                typeClass = "bg-emerald-50 border border-emerald-300 text-emerald-800 hover:bg-emerald-100 hover:-translate-y-0.5 cursor-pointer shadow-sm";
+                            } else if (cell.startsWith('B')) {
+                                typeClass = "bg-blue-50 border border-blue-300 text-blue-800 hover:bg-blue-100 hover:-translate-y-0.5 cursor-pointer shadow-sm";
+                            }
+                        }
+
+                        cellEl.className += ` ${typeClass}`;
+                        cellEl.onclick = () => openSeatModal(cell, blockX, blockY, blockZ);
+                        cellEl.innerHTML = `<span class="scale-90 transform">${cell}</span>`;
+                    }
+                    fragment.appendChild(cellEl);
+                });
+            });
+            container.appendChild(fragment);
+        }
+        function highlightOnMap() {
+            const query = document.getElementById('mapSearch').value.toLowerCase().trim();
+            const cells = document.querySelectorAll('#seatGridContainer > .grid-cell');
+            cells.forEach(cell => {
+                const seatId = cell.dataset.seatId;
+                if (!seatId) {
+                    cell.style.opacity = query ? "0.1" : "1";
+                    return;
+                }
+                if (!query) {
+                    cell.style.opacity = "1";
+                    cell.style.filter = "none";
+                    cell.style.transform = "none";
+                    return;
+                }
+                if (seatId.toLowerCase().includes(query)) {
+                    cell.style.opacity = "1";
+                    cell.style.filter = "drop-shadow(0 0 4px rgba(245, 158, 11, 0.9))";
+                    cell.style.transform = "scale(1.15)";
+                    cell.style.zIndex = "10";
+                } else {
+                    cell.style.opacity = "0.15";
+                    cell.style.filter = "grayscale(80%)";
+                    cell.style.transform = "none";
+                    cell.style.zIndex = "1";
+                }
+            });
+        }
+
+        function changeZoom(delta) {
+            zoomLevel = Math.max(0.3, Math.min(1.8, zoomLevel + delta));
+            document.getElementById('zoomPercent').textContent = `${Math.round(zoomLevel * 100)}%`;
+            document.getElementById('seatGridContainer').style.transform = `scale(${zoomLevel})`;
+        }
 
         // ==========================================
         // 5. 圖書檢索系統與對接
