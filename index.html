@@ -388,233 +388,8 @@
                     </div>
 
                     <!-- 右欄：讀者資訊與熱門排行榜 -->
-                    <div class="space-y-8">
-                        <!-- 個人摘要卡 (動態對接 SSO) -->
-                        <div
-                            class="bg-gradient-to-br from-nscu-500 to-nscu-700 p-6 rounded-2xl text-white shadow-nscu-glow relative overflow-hidden">
-                            <div
-                                class="absolute -right-8 -bottom-8 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none">
-                            </div>
-
-                            <div class="flex items-center space-x-4 mb-6" id="user-profile-box">
-                                <div class="w-12 h-12 rounded-full border border-white/30 p-1 bg-white/10 flex items-center justify-center overflow-hidden"
-                                    id="user-avatar-placeholder">
-                                    <span class="font-bold text-lg text-white">訪</span>
-                                </div>
-                                <div>
-                                    <div class="flex items-center space-x-1.5">
-                                        <h4 class="font-bold text-white text-base" id="user-profile-name">未登入讀者</h4>
-                                        <span
-                                            class="text-[9px] bg-white/20 text-white border border-white/30 px-1.5 py-0.5 rounded font-mono"
-                                            id="user-profile-badge">GUEST</span>
-                                    </div>
-                                    <p class="text-xs text-nscu-100 mt-1" id="user-profile-sub">請登入以體驗智慧校園系統</p>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3 border-t border-white/10 pt-4 text-center">
-                                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
-                                    <span class="text-[10px] text-nscu-200 block mb-0.5">當前借閱</span>
-                                    <span class="font-bold text-lg text-white" id="home-borrow-badge">0</span><span
-                                        class="text-xs text-nscu-100"> 冊</span>
-                                </div>
-                                <div class="bg-white/5 p-3 rounded-xl border border-white/10">
-                                    <span class="text-[10px] text-nscu-200 block mb-0.5">自習座位</span>
-                                    <span class="font-bold text-xs text-white" id="home-seat-badge">未登記</span>
-                                </div>
-                            </div>
-
-                            <div class="mt-4" id="user-card-action-container">
-                                <button onclick="redirectToSSO()"
-                                    class="w-full py-3 bg-white text-nscu-600 hover:bg-slate-100 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm">
-                                    <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
-                                    登入 Minecraft 帳號
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- 熱門圖書借閱榜 -->
-                        <section class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
-                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
-                                <h2 class="text-base font-bold text-nscu-500 flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-nscu-500"></span>
-                                    本週熱門圖書借閱榜
-                                </h2>
-                            </div>
-                            <div id="hot-books-container" class="space-y-3">
-                                <div class="animate-pulse space-y-3">
-                                    <div class="h-10 bg-slate-100 rounded-xl"></div>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ========================================== -->
-        <!-- VIEW 2: 館藏檢索 (Database View) -->
-        <!-- ========================================== -->
-        <section id="view-database" class="view-panel hidden max-w-7xl w-full mx-auto px-4 py-8">
-            <!-- 數據儀表板 -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div
-                    class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">館藏書籍總量</span>
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-3xl font-bold text-slate-900" id="totalBooks">--</span>
-                        <span class="text-xs text-slate-400">本</span>
-                    </div>
-                </div>
-                <div
-                    class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                    <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider block mb-1">在架上</span>
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-3xl font-bold text-emerald-600" id="availableBooks">--</span>
-                        <span class="text-xs text-slate-400">本</span>
-                    </div>
-                </div>
-                <div
-                    class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                    <span class="text-xs font-semibold text-amber-600 uppercase tracking-wider block mb-1">借閱中</span>
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-3xl font-bold text-amber-600" id="checkedOutBooks">--</span>
-                        <span class="text-xs text-slate-400">本</span>
-                    </div>
-                </div>
-                <div
-                    class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                    <span class="text-xs font-semibold text-nscu-green uppercase tracking-wider block mb-1">外借率</span>
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-3xl font-bold text-nscu-green" id="borrowRate">--</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 簡約搜尋與過濾區 -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mb-8">
-                <div class="flex flex-col gap-4">
-                    <div class="relative">
-                        <i
-                            class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="text" id="searchInput" oninput="applyFilters()"
-                            class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-nscu-green focus:border-transparent transition-all shadow-inner text-base"
-                            placeholder="請輸入書名、作者、引入者、索書號、DS-ISBN進行即時檢索...">
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-xs font-medium text-slate-500 flex items-center gap-1.5 pl-1">
-                                <i class="fa-solid fa-filter"></i> 學術分類與樓層
-                            </label>
-                            <select id="categoryFilter" onchange="applyFilters()"
-                                class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-nscu-green cursor-pointer transition-all">
-                                <option value="ALL">所有學科分類</option>
-                            </select>
-                        </div>
-                        <div class="flex flex-col gap-1.5">
-                            <label class="text-xs font-medium text-slate-500 flex items-center gap-1.5 pl-1">
-                                <i class="fa-solid fa-circle-info"></i> 借閱狀態
-                            </label>
-                            <select id="statusFilter" onchange="applyFilters()"
-                                class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-nscu-green cursor-pointer transition-all">
-                                <option value="ALL">所有借閱狀態</option>
-                                <option value="在架上">在架上</option>
-                                <option value="借閱中">借閱中</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
-                    <span id="searchFeedback">正在載入圖書館藏資料...</span>
-                    <button onclick="resetFilters()"
-                        class="text-nscu-green hover:text-nscu-darkgreen font-medium transition-colors flex items-center gap-1">
-                        <i class="fa-solid fa-arrow-rotate-left"></i> 重設所有篩選
-                    </button>
-                </div>
-            </div>
-
-            <!-- 圖書卡片區 -->
-            <div id="booksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="col-span-full py-16 flex flex-col items-center justify-center text-slate-400 gap-4">
-                    <i class="fa-solid fa-circle-notch fa-spin text-3xl text-nscu-green"></i>
-                    <span class="text-sm font-medium">正在載入資料庫，請稍候...</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- ========================================== -->
-        <!-- VIEW 3: 空間預約系統 (Booking View) -->
-        <!-- ========================================== -->
-        <section id="view-booking" class="view-panel hidden max-w-7xl w-full mx-auto px-4 py-8">
-
-            <!-- 第一級：空間預約大廳 (Lobby) -->
-            <div id="booking-lobby" class="space-y-8">
-                <div class="text-left">
-                    <h2 class="text-2xl font-serif font-black text-nscu-500">學習與研究空間預約大廳</h2>
-                    <p class="text-sm text-slate-500 mt-1">請選擇您要使用的空間類型，進行線上排程預約</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- 9F自習室卡片 -->
-                    <div onclick="enterSelfStudyMap()"
-                        class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between h-80">
-                        <div>
-                            <div
-                                class="w-14 h-14 bg-nscu-50 text-nscu-500 border border-nscu-100 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
-                                <i data-lucide="armchair" class="w-7 h-7"></i>
-                            </div>
-                            <h3 class="text-xl font-bold text-slate-800">9F 自習室實體地圖系統</h3>
-                            <p class="text-sm text-slate-500 mt-2 leading-relaxed">
-                                視覺化 2D 方塊座位地圖，支援與 Minecraft 伺服器即時同步，提供一般席與禁用筆電安靜席預約。
-                            </p>
-                        </div>
-                        <div class="flex items-center justify-between border-t border-slate-100 pt-4 mt-4">
-                            <span
-                                class="text-xs bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-full font-bold">
-                                剩餘：<span id="lobby-free-seats">--</span> 席
-                            </span>
-                            <span
-                                class="text-sm font-bold text-nscu-500 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                                進入地圖預約 <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- 4F研討室卡片 -->
-                    <div onclick="bookGroupSpace('4F 多功能研討室')"
-                        class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between h-80">
-                        <div>
-                            <div
-                                class="w-14 h-14 bg-amber-50 text-amber-600 border border-amber-100 rounded-2xl flex items-center justify-center mb-6">
-                                <i data-lucide="presentation" class="w-7 h-7"></i>
-                            </div>
-                            <h3 class="text-xl font-bold text-slate-800">4F 多功能學術研討室</h3>
-                            <p class="text-sm text-slate-500 mt-2 leading-relaxed">
-                                配備超大 4K 無線簡報螢幕、行動白板、高速音響系統。適合 6 - 12 人進行專題簡報及討論。
-                            </p>
-                        </div>
-                        <div class="flex items-center justify-between border-t border-slate-100 pt-4 mt-4">
-                            <span
-                                class="text-xs bg-amber-50 text-amber-700 border border-amber-100 px-2.5 py-1 rounded-full font-bold">
-                                4 間空閒
-                            </span>
-                            <span class="text-sm font-bold text-nscu-500 flex items-center gap-1">
-                                線上登記預約 <i data-lucide="calendar-plus" class="w-4 h-4"></i>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- 3F研究小間卡片 -->
-                    <div onclick="bookGroupSpace('3F 個人研究小間')"
-                        class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between h-80">
-                        <div>
-                            <div
-                                class="w-14 h-14 bg-blue-50 text-blue-600 border border-blue-100 rounded-2xl flex items-center justify-center mb-6">
-                                <i data-lucide="book-open" class="w-7 h-7"></i>
-                            </div>
+                    <!-- JAVASCRIPT GLOBAL LOGIC (loaded from modules) -->
+                    <script type="module" src="src/main.js"></script>
                             <h3 class="text-xl font-bold text-slate-800">3F 個人獨立研究小間</h3>
                             <p class="text-sm text-slate-500 mt-2 leading-relaxed">
                                 提供寧靜的個人寫作與沈思空間，配備人體工學座椅、獨立溫控與調光檯燈。
@@ -1181,6 +956,7 @@
     <!-- ========================================== -->
     <!-- JAVASCRIPT GLOBAL LOGIC (全網頁控制核心) -->
     <!-- ========================================== -->
+<<<<<<< HEAD
     <script>
         // ==========================================
         // 1. 全域變數與資料初始化
@@ -1970,6 +1746,9 @@
                 isbn: (row['DS-ISBN'] || row['isbn'] || row['ISBN'] || '').trim()
             })).filter(book => book.id && book.title);
         }
+=======
+    <script type="module" src="src/main.js"></script>
+>>>>>>> e9ed300 (agent rebuild)
 
         function buildCategoryFilter() {
             const select = document.getElementById('categoryFilter');
@@ -1996,22 +1775,32 @@
 
             const homeBorrowRate = document.getElementById('home-borrow-rate');
             const homeBorrowDesc = document.getElementById('home-borrow-desc');
+<<<<<<< HEAD
 
             if (homeBorrowRate) homeBorrowRate.textContent = rate;
             if (homeBorrowDesc) {
                 homeBorrowDesc.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>已借出 ${checkedOut} 冊 / 共 ${total} 冊`;
             }
+=======
+            
+            if (homeBorrowRate) homeBorrowRate.textContent = rate;
+            if (homeBorrowDesc) homeBorrowDesc.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>已借出 ${checkedOut} 冊 / 共 ${total} 冊`;
+>>>>>>> e9ed300 (agent rebuild)
         }
 
         function renderBooks(data) {
             const grid = document.getElementById('booksGrid');
             if (!grid) return;
             grid.innerHTML = '';
+<<<<<<< HEAD
 
             if (data.length === 0) {
                 grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400">沒有尋找到符合篩選條件的書籍。</div>`;
                 return;
             }
+=======
+            if (data.length === 0) { grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400">沒有尋找到符合篩選條件的書籍。</div>`; return; }
+>>>>>>> e9ed300 (agent rebuild)
 
             data.forEach(book => {
                 const isBorrowedByMe = myBorrowedBooks.some(b => b.id === book.id);
@@ -2020,8 +1809,12 @@
 
                 const card = document.createElement('div');
                 card.className = 'book-card bg-white rounded-xl border border-slate-200 p-6 flex flex-col justify-between cursor-pointer shadow-sm relative group';
+<<<<<<< HEAD
                 card.onclick = () => openBookModal(book);
 
+=======
+                
+>>>>>>> e9ed300 (agent rebuild)
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-start gap-4 mb-3">
@@ -2054,19 +1847,30 @@
             const status = document.getElementById('statusFilter').value;
 
             const filtered = booksData.filter(book => {
+<<<<<<< HEAD
                 const matchesSearch = book.title.toLowerCase().includes(query) || book.author.toLowerCase().includes(query) || book.id.toLowerCase().includes(query);
                 const matchesCategory = (category === 'ALL' || book.category === category);
 
                 const isBorrowedByMe = myBorrowedBooks.some(b => b.id === book.id);
                 const isAvailable = !isBorrowedByMe && (book.status === '在架上' || book.status === '在館中');
 
+=======
+                const matchesSearch = book.title.toLowerCase().includes(query) || book.author.toLowerCase().includes(query) || book.id.toLowerCase().includes(query) || book.isbn.includes(query);
+                const matchesCategory = (category === 'ALL' || book.category === category);
+                const isBorrowedByMe = myBorrowedBooks.some(b => b.id === book.id);
+                const isAvailable = !isBorrowedByMe && (book.status === '在架上' || book.status === '在館中');
+                
+>>>>>>> e9ed300 (agent rebuild)
                 let matchesStatus = true;
                 if (status === '在架上') matchesStatus = isAvailable;
                 if (status === '借閱中') matchesStatus = !isAvailable;
 
                 return matchesSearch && matchesCategory && matchesStatus;
             });
+<<<<<<< HEAD
 
+=======
+>>>>>>> e9ed300 (agent rebuild)
             renderBooks(filtered);
             document.getElementById('searchFeedback').innerHTML = `檢索完成：共尋獲 <strong class="text-nscu-green">${filtered.length}</strong> 本符合條件之館藏`;
         }
@@ -2078,6 +1882,7 @@
             applyFilters();
         }
 
+<<<<<<< HEAD
         // --- 互動彈窗 (Modal) 管理器 ---
         function openBookModal(book) {
             currentModalBook = book;
@@ -2191,6 +1996,8 @@
             }
         }
 
+=======
+>>>>>>> e9ed300 (agent rebuild)
         // ------------------------------------------
         // 6. 借還書系統核心邏輯
         // ------------------------------------------
