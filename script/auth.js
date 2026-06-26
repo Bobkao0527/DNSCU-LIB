@@ -63,17 +63,27 @@ async function handleSSOAuth() {
 
 // 登入成功 UI 渲染
 function setLoginMode(user) {
+    // 1. 電腦版右上角：同時保留「虛擬借閱證」按鈕，並在右手邊並排一個精緻、不帶名字的「登出」按鈕
     const authArea = document.getElementById('nav-auth-area');
     if (authArea) {
-        // 同時保留虛擬借閱證，並在旁邊放置無帳號標記的登出按鈕
         authArea.innerHTML = `
-            <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-4 py-2 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
+            <button onclick="toggleLibraryCard()" class="flex items-center space-x-1.5 bg-white hover:bg-nscu-50 border border-white px-3 lg:px-4 py-2 rounded-xl text-xs lg:text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95 shrink-0">
                 <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
                 <span>虛擬借閱證</span>
             </button>
-            <button onclick="logout()" class="flex items-center space-x-2 bg-red-50 hover:bg-red-100 border border-red-100 px-4 py-2 rounded-xl text-sm font-bold text-red-600 transition-all shadow-md active:scale-95">
-                <i data-lucide="log-out" class="w-4 h-4 text-red-600"></i>
+            <button onclick="logout()" class="flex items-center space-x-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-100 px-3 py-2 rounded-xl text-xs lg:text-sm font-bold text-rose-600 transition-all shadow-md active:scale-95 shrink-0">
+                <i data-lucide="log-out" class="w-4 h-4 text-rose-600"></i>
                 <span>登出</span>
+            </button>
+        `;
+    }
+
+    // 2. 行動端下拉選單內部：彩現「登出」橫幅
+    const mobAuthArea = document.getElementById('mob-auth-area');
+    if (mobAuthArea) {
+        mobAuthArea.innerHTML = `
+            <button onclick="logout(); toggleMobileMenu()" class="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-100 bg-red-950/20 hover:bg-red-900/30 transition-all border border-red-500/20">
+                <i data-lucide="log-out" class="w-4 h-4 text-red-400"></i>登出帳號 (${user.username})
             </button>
         `;
     }
@@ -121,12 +131,23 @@ function setGuestMode() {
     window.currentUserCardNumber = "";
     window.currentUserBorrowDict = {};
 
+    // 1. 電腦版右上角：只保留「虛擬借閱證」
     const authArea = document.getElementById('nav-auth-area');
     if (authArea) {
         authArea.innerHTML = `
             <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-4 py-2 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
                 <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
                 <span>虛擬借閱證</span>
+            </button>
+        `;
+    }
+
+    // 2. 行動端下拉選單內部：顯示登入認證引導
+    const mobAuthArea = document.getElementById('mob-auth-area');
+    if (mobAuthArea) {
+        mobAuthArea.innerHTML = `
+            <button onclick="redirectToSSO(); toggleMobileMenu()" class="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-nscu-100 hover:bg-nscu-700 transition-all">
+                <i data-lucide="contact-2" class="w-4 h-4 text-nscu-200"></i>登入 Minecraft 帳號
             </button>
         `;
     }

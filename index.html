@@ -71,47 +71,47 @@
     <!-- 統一頂部導覽列 (Navigation Bar) -->
     <nav class="sticky top-0 z-40 bg-nscu-500 text-white shadow-md border-b border-nscu-600/50 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
+            <div class="flex items-center justify-between h-20 gap-2">
                 <!-- Logo 區域 (點擊回到首頁) -->
-                <div onclick="switchView('home')" class="flex items-center space-x-3 cursor-pointer group">
+                <div onclick="switchView('home')" class="flex items-center space-x-2 lg:space-x-3 cursor-pointer group shrink-0">
                     <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md transition-transform group-hover:scale-105">
                         <i data-lucide="compass" class="w-5 h-5 text-nscu-500 animate-spin-slow"></i>
                     </div>
                     <div>
-                        <div class="flex items-center space-x-1.5">
-                            <span class="font-black text-xl tracking-wider text-white font-serif">DNSCU LIB</span>
-                            <span class="text-[9px] bg-nscu-600 text-nscu-100 border border-nscu-200/30 px-1.5 py-0.5 rounded font-mono font-bold">電子化</span>
+                        <div class="flex items-center space-x-1">
+                            <span class="font-black text-lg lg:text-xl tracking-wider text-white font-serif">DNSCU LIB</span>
+                            <span class="text-[9px] bg-nscu-600 text-nscu-100 border border-nscu-200/30 px-1 py-0.5 rounded font-mono font-bold">電子化</span>
                         </div>
                         <p class="text-[10px] text-nscu-100/80 leading-none mt-0.5">國立南十字大學圖書館</p>
                     </div>
                 </div>
 
-                <!-- 電腦版導覽選單 (SPA 切換面板) -->
-                <div class="hidden md:flex items-center space-x-1">
-                    <button id="nav-home" onclick="switchView('home')" class="nav-btn px-4 py-2 rounded-lg text-sm font-bold text-nscu-500 bg-white shadow-sm">
-                        <i data-lucide="home" class="w-4 h-4 inline mr-1.5"></i>首頁
+                <!-- 電腦版導覽選單 (SPA 切換面板) - 使用響應式字型與內距防止寬度擠壓 -->
+                <div class="hidden md:flex items-center space-x-1 shrink-0">
+                    <button id="nav-home" onclick="switchView('home')" class="nav-btn px-2 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-bold text-nscu-500 bg-white shadow-sm">
+                        <i data-lucide="home" class="w-3.5 h-3.5 lg:w-4 lg:h-4 inline mr-1"></i>首頁
                     </button>
-                    <button id="nav-database" onclick="switchView('database')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all">
-                        <i data-lucide="search" class="w-4 h-4 inline mr-1.5"></i>館藏檢索
+                    <button id="nav-database" onclick="switchView('database')" class="nav-btn px-2 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all">
+                        <i data-lucide="search" class="w-3.5 h-3.5 lg:w-4 lg:h-4 inline mr-1"></i>館藏檢索
                     </button>
-                    <button id="nav-booking" onclick="switchView('booking')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all">
-                        <i data-lucide="calendar" class="w-4 h-4 inline mr-1.5"></i>空間預約
+                    <button id="nav-booking" onclick="switchView('booking')" class="nav-btn px-2 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5 lg:w-4 lg:h-4 inline mr-1"></i>空間預約
                     </button>
-                    <button id="nav-barb" onclick="switchView('barb')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all">
-                        <i data-lucide="arrow-left-right" class="w-4 h-4 inline mr-1.5"></i>借還書系統
+                    <button id="nav-barb" onclick="switchView('barb')" class="nav-btn px-2 lg:px-4 py-2 rounded-lg text-xs lg:text-sm font-medium text-nscu-100 hover:text-white hover:bg-nscu-600 transition-all">
+                        <i data-lucide="arrow-left-right" class="w-3.5 h-3.5 lg:w-4 lg:h-4 inline mr-1"></i>借還書系統
                     </button>
                 </div>
 
-                <!-- 右側：個人化功能 -->
-                <div class="hidden md:flex items-center space-x-3" id="nav-auth-area">
-                    <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-4 py-2 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
+                <!-- 右側：個人化功能 (電腦版雙按鈕並排，設有 shrink-0 確保不會縮水擠壓) -->
+                <div class="hidden md:flex items-center space-x-2 shrink-0" id="nav-auth-area">
+                    <button onclick="toggleLibraryCard()" class="flex items-center space-x-1 bg-white hover:bg-nscu-50 border border-white px-3 py-2 rounded-xl text-xs lg:text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
                         <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
                         <span>虛擬借閱證</span>
                     </button>
                 </div>
 
-                <!-- 行動裝置按鈕組 -->
-                <div class="flex items-center md:hidden space-x-2">
+                <!-- 行動裝置按鈕組 (小於 768px) -->
+                <div class="flex items-center md:hidden space-x-1.5 shrink-0">
                     <button onclick="toggleLibraryCard()" class="p-2.5 bg-white text-nscu-500 rounded-xl hover:bg-nscu-50 transition-colors active:scale-95 shadow-md flex items-center justify-center">
                         <i data-lucide="contact-2" class="w-5 h-5"></i>
                     </button>
@@ -122,7 +122,7 @@
             </div>
         </div>
 
-        <!-- 行動端下拉式選單抽屜 -->
+        <!-- 行動端下拉式選單抽屜 (新增下方手機端登入、登出動態注入區域) -->
         <div id="mobile-menu" class="hidden md:hidden bg-nscu-600 text-white border-t border-nscu-600/60 overflow-hidden transition-all">
             <div class="px-4 pt-3 pb-6 space-y-2">
                 <button onclick="switchView('home'); toggleMobileMenu()" id="mob-nav-home" class="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-nscu-500 bg-white">
@@ -137,6 +137,11 @@
                 <button onclick="switchView('barb'); toggleMobileMenu()" id="mob-nav-barb" class="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-nscu-100 hover:bg-nscu-700 transition-all">
                     <i data-lucide="arrow-left-right" class="w-4 h-4"></i>借還書系統
                 </button>
+                
+                <!-- 新增：行動版選單內部的登出與帳號登入功能區域 -->
+                <div id="mob-auth-area" class="pt-3 mt-3 border-t border-nscu-500/30 space-y-2">
+                    <!-- 由 script/auth.js 動態填充 -->
+                </div>
             </div>
         </div>
     </nav>
