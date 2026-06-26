@@ -65,10 +65,15 @@ async function handleSSOAuth() {
 function setLoginMode(user) {
     const authArea = document.getElementById('nav-auth-area');
     if (authArea) {
+        // 同時保留虛擬借閱證，並在旁邊放置無帳號標記的登出按鈕
         authArea.innerHTML = `
-            <button onclick="logout()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-4 py-2 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
+            <button onclick="toggleLibraryCard()" class="flex items-center space-x-2 bg-white hover:bg-nscu-50 border border-white px-4 py-2 rounded-xl text-sm font-bold text-nscu-500 transition-all shadow-md active:scale-95">
+                <i data-lucide="contact-2" class="w-4 h-4 text-nscu-500"></i>
+                <span>虛擬借閱證</span>
+            </button>
+            <button onclick="logout()" class="flex items-center space-x-2 bg-red-50 hover:bg-red-100 border border-red-100 px-4 py-2 rounded-xl text-sm font-bold text-red-600 transition-all shadow-md active:scale-95">
                 <i data-lucide="log-out" class="w-4 h-4 text-red-600"></i>
-                <span class="text-red-600">登出 (${user.username})</span>
+                <span>登出</span>
             </button>
         `;
     }
