@@ -1,0 +1,59 @@
+/* 基礎背景樣式 */
+body {
+    background-color: #fafbf9;
+    background-image:
+        radial-gradient(at 0% 0%, rgba(27, 67, 50, 0.015) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(212, 163, 115, 0.015) 0px, transparent 50%);
+    background-attachment: fixed;
+}
+
+/* 自訂極細捲軸 */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(241, 245, 249, 1);
+    border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(27, 67, 50, 0.2);
+    border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(27, 67, 50, 0.4);
+}
+
+/* 地圖視窗網格背景與滾動 */
+.map-viewport {
+    overflow: auto;
+    border: 1px solid #e2e8f0;
+    background-color: #f1f5f9;
+    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+    background-size: 16px 16px;
+}
+
+/* 自習室 2D 物理座位網格動畫縮放 */
+.seat-grid-container {
+    transition: transform 0.15s ease-out;
+    transform-origin: top left;
+    will-change: transform;
+}
+
+.grid-cell {
+    contain: layout paint;
+    aspect-ratio: 1 / 1;
+}
+
+/* 圖書精緻卡片 hover */
+.book-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px -8px rgba(27, 67, 50, 0.15);
+}
