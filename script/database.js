@@ -287,7 +287,7 @@ function handleBarbAction(action) {
     guardAction(() => {
         const inputVal = document.getElementById('barb-input-id').value.trim();
         if (!inputVal) {
-            showToast("⚠️ 請輸入或點選索書號！", "warning");
+            showToast("⚠️ 請輸入或選取索書號！", "warning");
             return;
         }
         if (action === 'borrow') {
@@ -299,8 +299,8 @@ function handleBarbAction(action) {
     });
 }
 
-// 核心：借書
-function borrowBook(bookId) {
+// 核心：借書 (自動發送雲端雙向同步)
+async function borrowBook(bookId) {
     const book = window.booksData.find(b => b.id.toLowerCase() === bookId.toLowerCase());
     if (!book) {
         showToast("❌ 找不到此索書號對應的圖書！", "error");
@@ -313,7 +313,7 @@ function borrowBook(bookId) {
 
     const today = new Date();
     const returnDate = new Date();
-    returnDate.setDate(today.getDate() + 30); // 延長為 30 天期
+    returnDate.setDate(today.getDate() + 30); // 30天期
 
     window.myBorrowedBooks.push({
         id: book.id,
@@ -323,22 +323,80 @@ function borrowBook(bookId) {
     localStorage.setItem('NSCU_MY_BORROWED', JSON.stringify(window.myBorrowedBooks));
 
     showToast(`🎉 成功借閱《${book.title}》！`);
+    
+    // 全域介面同步
     syncGlobalLibraryState();
+
+    // 【1. 雲端同步借閱清單】發送到 user_db 寫回此帳戶的 borrowDict
+    await syncBorrowListToCloud(window.currentUser.username, window.myBorrowedBooks);
+    
+    // 【2. 雲端同步修改圖書庫狀態】將圖書庫中的這本書改為「借閱中」
+    await syncBookStatusToCloud(book.id, "借閱中");
 }
 
-// 核心：還書
-function returnBook(bookId) {
+// 核心：還書 (自動發送雲端雙向同步)
+async function returnBook(bookId) {
     const idx = window.myBorrowedBooks.findIndex(b => b.id.toLowerCase() === bookId.toLowerCase());
     if (idx === -1) {
         showToast("⚠️ 您的借閱清單中無此圖書索書號！", "warning");
         return;
     }
     const bookTitle = window.myBorrowedBooks[idx].title;
+    const targetBookId = window.myBorrowedBooks[idx].id;
+    
     window.myBorrowedBooks.splice(idx, 1);
     localStorage.setItem('NSCU_MY_BORROWED', JSON.stringify(window.myBorrowedBooks));
 
     showToast(`🧹 《${bookTitle}》歸還完成！`);
+    
+    // 全域介面同步
     syncGlobalLibraryState();
+
+    // 【1. 雲端同步借閱清單】更新後的清單寫回 user_db 的 borrowDict
+    await syncBorrowListToCloud(window.currentUser.username, window.myBorrowedBooks);
+    
+    // 【2. 雲端同步修改圖書庫狀態】將圖書庫中的這本書還原為「在架上」
+    await syncBookStatusToCloud(targetBookId, "在架上");
+}
+
+// 靜默發送：將個人借閱清單同步到 Google Sheets 使用者資料庫中
+async function syncBorrowListToCloud(username, borrowList) {
+    try {
+        const encryptedUser = encryptUsername(username);
+        const jsonListStr = JSON.stringify(borrowList);
+
+        // 利用現有 USER_DB_API 將加密後的 JSON 陣列更新回 Sheet
+        await fetch(window.USER_DB_API_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username: encryptedUser,
+                borrowDict: jsonListStr // 更新後的個人借書清單字串
+            })
+        });
+        console.log("[雲端同步] 個人借閱字典已同步。");
+    } catch (e) {
+        console.error("[雲端同步] 同步個人字典失敗:", e);
+    }
+}
+
+// 靜默發送：將指定索書號的書籍狀態更新到圖書庫 Sheet 中 (改呼叫專門的 BOOK_STATUS_API_URL)
+async function syncBookStatusToCloud(bookId, newStatus) {
+    try {
+        await fetch(window.BOOK_STATUS_API_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                bookId: bookId,
+                status: newStatus
+            })
+        });
+        console.log(`[雲端同步] 圖書《${bookId}》在庫狀態已變更為：${newStatus}`);
+    } catch (e) {
+        console.error("[雲端同步] 更新圖書在架狀態失敗:", e);
+    }
 }
 
 // 同步全系統狀態（包括各分頁與徽章計數）

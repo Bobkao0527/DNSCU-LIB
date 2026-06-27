@@ -1,21 +1,25 @@
 // ==========================================
-// 核心安全加解密模組 (Cryptography Engine)
+// 核心安全加解密模組 (Cryptography Engine - 決定性加密優化版)
 // ==========================================
 
-// 預設密鑰 (你可以在此處更換成你專屬的 16 或 32 位元密鑰)
-const SECRET_KEY = "nscu_lib_secret_key_2026_dolphin";
+// 預設密鑰 (長度必須為 32 字元以符合 AES-256 規格)
+const SECRET_KEY_STR = "nscu_lib_secret_key_2026_dolphin";
 
 /**
- * 加密玩家 ID (AES-256)
+ * 決定性加密玩家 ID (AES-256 ECB 模式)
+ * 確保同一個玩家 ID 加密出來的結果百分之百相同，供 Google Sheets 後台穩定進行退位比對
  * @param {string} username - 原始明文玩家 ID
- * @returns {string} - 安全的 Hex 格式加密字串 (避免 Base64 的 +, /, = 字元造成 URL 或 CSV 混亂)
+ * @returns {string} - 安全的 Hex 格式加密字串
  */
 function encryptUsername(username) {
     if (!username) return "";
     try {
-        const ciphertext = CryptoJS.AES.encrypt(username.trim(), SECRET_KEY).toString();
-        // 將 Base64 字串轉換成純 Hex 十六進位編碼，確保能安全放置於 CSV 單格與 URL 參數中
-        return CryptoJS.enc.Hex.stringify(CryptoJS.enc.Utf8.parse(ciphertext));
+        const key = CryptoJS.enc.Utf8.parse(SECRET_KEY_STR);
+        const encrypted = CryptoJS.AES.encrypt(username.trim(), key, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7
+        });
+        return encrypted.ciphertext.toString();
     } catch (e) {
         console.error("[安全系統] 加密失敗:", e);
         return "";
@@ -23,18 +27,22 @@ function encryptUsername(username) {
 }
 
 /**
- * 解密玩家 ID (AES-256)
+ * 決定性解密玩家 ID (AES-256 ECB 模式)
  * @param {string} hexStr - 加密過的 Hex 格式字串
  * @returns {string} - 原始明文玩家 ID
  */
 function decryptUsername(hexStr) {
     if (!hexStr) return "";
     try {
-        // 將 Hex 十六進位編碼還原成 Base64 密文字串
-        const ciphertext = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Hex.parse(hexStr));
-        const bytes = CryptoJS.AES.decrypt(ciphertext, SECRET_KEY);
-        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-        return decrypted;
+        const key = CryptoJS.enc.Utf8.parse(SECRET_KEY_STR);
+        const ciphertextParams = CryptoJS.lib.CipherParams.create({
+            ciphertext: CryptoJS.enc.Hex.parse(hexStr)
+        });
+        const decrypted = CryptoJS.AES.decrypt(ciphertextParams, key, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7
+        });
+        return decrypted.toString(CryptoJS.enc.Utf8);
     } catch (e) {
         console.error("[安全系統] 解密失敗，可能密鑰不符或資料損壞");
         return "";

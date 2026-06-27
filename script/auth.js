@@ -45,7 +45,7 @@ async function handleSSOAuth() {
                     token: token
                 };
                 
-                // 動態對接 Google Sheet 使用者資料庫進行隨機證號同步 (內部自動完成安全加解密比對)
+                // 動態對接 Google Sheet 使用者資料庫進行隨機證號與借閱清單同步
                 await checkAndSyncUser(data.username);
                 setLoginMode(window.currentUser);
             } else {
@@ -130,6 +130,8 @@ function setGuestMode() {
     window.currentUser = null;
     window.currentUserCardNumber = "";
     window.currentUserBorrowDict = {};
+    window.myBorrowedBooks = [];
+    localStorage.removeItem('NSCU_MY_BORROWED');
 
     // 1. 電腦版右上角：只保留「虛擬借閱證」
     const authArea = document.getElementById('nav-auth-area');
@@ -231,7 +233,7 @@ async function checkAndSyncUser(username) {
         
         let userFound = false;
         let matchedCardNumber = "";
-        let matchedBorrowDictStr = "{}";
+        let matchedBorrowDictStr = "[]"; // 預設空陣列 JSON
 
         Papa.parse(csvText, {
             header: false,
@@ -245,7 +247,7 @@ async function checkAndSyncUser(username) {
                         if (decryptedUser && decryptedUser.toLowerCase() === username.trim().toLowerCase()) {
                             userFound = true;
                             matchedCardNumber = rows[i][1];
-                            matchedBorrowDictStr = rows[i][2] || "{}";
+                            matchedBorrowDictStr = rows[i][2] || "[]";
                             break;
                         }
                     }
@@ -257,19 +259,28 @@ async function checkAndSyncUser(username) {
             console.log(`[系統] 找到現有用戶：${username}`);
             window.currentUserCardNumber = matchedCardNumber;
             try {
-                window.currentUserBorrowDict = JSON.parse(matchedBorrowDictStr);
+                // 解密後載入玩家個人雲端借書字典
+                const parsedDict = JSON.parse(matchedBorrowDictStr);
+                if (Array.isArray(parsedDict)) {
+                    window.myBorrowedBooks = parsedDict;
+                } else {
+                    window.myBorrowedBooks = [];
+                }
+                localStorage.setItem('NSCU_MY_BORROWED', JSON.stringify(window.myBorrowedBooks));
             } catch (e) {
-                console.error("[系統] 字典解析失敗，重設為空字典", e);
-                window.currentUserBorrowDict = {};
+                console.error("[系統] 借閱字典解析失敗，重設為空", e);
+                window.myBorrowedBooks = [];
+                localStorage.setItem('NSCU_MY_BORROWED', JSON.stringify([]));
             }
             showToast(`歡迎回來！已同步您的借閱證號：${window.currentUserCardNumber}`, "success");
         } else {
             console.log(`[系統] 未發現此用戶，建立新加密帳戶中...`);
             const randomCardNum = "LIB" + Math.floor(100000 + Math.random() * 900000);
-            const emptyDictStr = "{}";
+            const emptyDictStr = "[]";
             
             window.currentUserCardNumber = randomCardNum;
-            window.currentUserBorrowDict = {};
+            window.myBorrowedBooks = [];
+            localStorage.setItem('NSCU_MY_BORROWED', JSON.stringify([]));
 
             // 【加密寫入】將明文 ID 加密後再傳給 Google Apps Script 寫入後台
             await writeNewUserToSheet(username, randomCardNum, emptyDictStr);
@@ -284,7 +295,6 @@ async function checkAndSyncUser(username) {
 // 呼叫 Google Apps Script 寫入新帳戶資料 (自動進行安全加密)
 async function writeNewUserToSheet(username, cardNumber, dictStr) {
     try {
-        // 將明文玩家 ID 加密成 Hex 安全碼再寫入
         const encryptedUser = encryptUsername(username);
 
         await fetch(window.USER_DB_API_URL, {

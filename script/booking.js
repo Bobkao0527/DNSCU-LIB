@@ -1,5 +1,5 @@
 // ==========================================
-// 空間預約與 2D 方塊座位地圖模組 (booking.html)
+// 空間預約與 2D 方塊座位地圖模組 (booking.js)
 // ==========================================
 
 function enterSelfStudyMap() {
@@ -19,7 +19,7 @@ function bookGroupSpace(spaceName) {
     });
 }
 
-// 異步讀取 Minecraft 自習室物理實體地圖 CSV
+// 異步讀取 Minecraft 自習室物理實體地圖 CSV (百分之百即時讀取雲端)
 async function loadMapData() {
     try {
         updateMapStatus(true, "遠端連線中...", "正在載入 52 x 77 物理地圖空間...");
@@ -66,7 +66,7 @@ function updateMapStatus(isOnline, shortText, longText) {
     }
 }
 
-// 解析 CSV 的座標矩陣數據 (支援安全解密)
+// 解析 CSV 的座標矩陣數據 (支援安全解密，不依賴任何 LocalCache)
 function processCSVGrid(rows) {
     window.csvOccupiedSeats = {};
     window.gridMatrix = [];
@@ -97,7 +97,7 @@ function processCSVGrid(rows) {
         window.gridMatrix.push(Array(52).fill(""));
     }
 
-    cleanLocalCacheWithRemote();
+    // 移除原有的 cleanLocalCacheWithRemote 混淆防護
     document.getElementById('loadingOverlay').classList.add('hidden');
     updateMapStatus(true, "同步成功", "9F 自習室實體地圖系統運作中");
 
@@ -105,49 +105,16 @@ function processCSVGrid(rows) {
     calculateMapStatistics();
 }
 
-// 清除衝突或過期的本地快取資料
-function cleanLocalCacheWithRemote() {
-    let changed = false;
-    Object.keys(window.localCacheOccupied).forEach(seatId => {
-        const cacheObj = window.localCacheOccupied[seatId];
-        const isRemoteOccupied = !!window.csvOccupiedSeats[seatId];
-        const remoteOwner = window.csvOccupiedSeats[seatId] || "";
-
-        if (cacheObj.status === 'occupied') {
-            if (isRemoteOccupied && remoteOwner.toLowerCase() === cacheObj.name.toLowerCase()) {
-                delete window.localCacheOccupied[seatId];
-                changed = true;
-            }
-        } else if (cacheObj.status === 'free') {
-            if (!isRemoteOccupied) {
-                delete window.localCacheOccupied[seatId];
-                changed = true;
-            }
-        }
-    });
-    if (changed) {
-        localStorage.setItem('NSCU_LOCAL_OCCUPIED_SEATS', JSON.stringify(window.localCacheOccupied));
-    }
-}
-
-// 判定座位是否被佔用 (包含遠端與本地快取同步)
+// 判定座位是否被佔用 (完全依賴雲端 CSV 資料)
 function checkSeatOccupied(seatId) {
-    if (window.localCacheOccupied[seatId]) {
-        if (window.localCacheOccupied[seatId].status === 'occupied') return true;
-        if (window.localCacheOccupied[seatId].status === 'free') return false;
-    }
     return !!window.csvOccupiedSeats[seatId];
 }
 
 function getSeatOccupantName(seatId) {
-    if (window.localCacheOccupied[seatId]) {
-        if (window.localCacheOccupied[seatId].status === 'occupied') return window.localCacheOccupied[seatId].name;
-        if (window.localCacheOccupied[seatId].status === 'free') return null;
-    }
     return window.csvOccupiedSeats[seatId] || null;
 }
 
-// 統計自習室使用率
+// 統計自習室使用率 (即時運算)
 function calculateMapStatistics() {
     let totalSeats = 0;
     let availableA = 0;
@@ -188,12 +155,14 @@ function calculateMapStatistics() {
     checkMySeatStatus();
 }
 
-// 檢查當前登入者是否已在自習室劃位
+// 檢查當前登入者是否已在自習室劃位 (直接自雲端資料比對，完全不使用 LocalCache)
 function checkMySeatStatus() {
     let mySeatId = "未登記";
     if (window.currentUser) {
-        Object.keys(window.localCacheOccupied).forEach(seatId => {
-            if (window.localCacheOccupied[seatId].status === 'occupied' && window.localCacheOccupied[seatId].name.toLowerCase() === window.currentUser.username.toLowerCase()) {
+        const loggedInUser = window.currentUser.username.toLowerCase();
+        Object.keys(window.csvOccupiedSeats).forEach(seatId => {
+            const occupant = window.csvOccupiedSeats[seatId];
+            if (occupant && occupant.toLowerCase() === loggedInUser) {
                 mySeatId = `9F - ${seatId}`;
             }
         });
@@ -381,7 +350,7 @@ function toggleCancelForm(show) {
     }
 }
 
-// 儲存劃位 (支援安全加密)
+// 儲存劃位 (支援安全加密，移除了 LocalStorage)
 async function saveRegistration() {
     if (!window.selectedCell) return;
     const mcId = document.getElementById('regName').value.trim();
@@ -390,30 +359,37 @@ async function saveRegistration() {
         return;
     }
 
-    window.localCacheOccupied[window.selectedCell.seatId] = {
-        status: 'occupied',
-        name: mcId, // 網頁記憶體與 LocalStorage 保存明文以供快速更新 UI
-        time: new Date().getTime()
-    };
-    localStorage.setItem('NSCU_LOCAL_OCCUPIED_SEATS', JSON.stringify(window.localCacheOccupied));
-    showToast(`🎉 成功登記座位 ${window.selectedCell.seatId}！`);
+    // 樂觀 UI 渲染：先暫存於瀏覽器記憶體中 (不存入 LocalStorage)，提供零遲延反饋
+    window.csvOccupiedSeats[window.selectedCell.seatId] = mcId;
+    
     closeSeatModal();
     renderGridMap();
     calculateMapStatistics();
 
-    // 【地圖安全加密】將劃位玩家 ID 加密為 Hex 字串後再傳送至 Apps Script 寫入地圖 Google Sheet
+    // 將劃位玩家 ID 加密為 Hex 字串後傳送至 Apps Script 寫入地圖 Google Sheet
     const encryptedMcId = encryptUsername(mcId);
 
-    // 背景靜默送出登記
-    fetch(window.APPS_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ seatId: window.selectedCell.seatId, minecraftId: encryptedMcId, action: 'register' })
-    }).catch(() => { });
+    try {
+        await fetch(window.APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ seatId: window.selectedCell.seatId, minecraftId: encryptedMcId, action: 'register' })
+        });
+        
+        showToast(`🎉 成功登記座位 ${window.selectedCell.seatId}！`);
+        
+        // 延遲 1.5 秒重新自雲端獲取最新 CSV，確保資料無縫對齊
+        setTimeout(() => {
+            loadMapData();
+        }, 1500);
+    } catch (e) {
+        console.error("雲端劃位失敗:", e);
+        showToast("⚠️ 雲端劃位連線失敗", "warning");
+    }
 }
 
-// 取消劃位
+// 取消劃位 (移除了 LocalStorage)
 async function confirmCancelRegistration() {
     if (!window.selectedCell) return;
     const inputMcId = document.getElementById('cancelNameInput').value.trim();
@@ -424,32 +400,45 @@ async function confirmCancelRegistration() {
 
     const currentOccupant = getSeatOccupantName(window.selectedCell.seatId);
 
-    // 驗證是否為劃位玩家本人 (解密後的 occupant 名稱與當前登入玩家做比對)
+    // 驗證是否為劃位玩家本人
     if (window.currentUser.username.toLowerCase() !== inputMcId.toLowerCase() ||
         (currentOccupant && currentOccupant.toLowerCase() !== window.currentUser.username.toLowerCase())) {
         showToast("❌ 身分驗證失敗！您無權限退還此座位。", "error");
         return;
     }
 
-    window.localCacheOccupied[window.selectedCell.seatId] = {
-        status: 'free',
-        name: '',
-        time: new Date().getTime()
-    };
-    localStorage.setItem('NSCU_LOCAL_OCCUPIED_SEATS', JSON.stringify(window.localCacheOccupied));
-    showToast(`🧹 座位 ${window.selectedCell.seatId} 已恢復空閒。`);
+    // 樂觀 UI 渲染：先在瀏覽器記憶體中釋放座位 (不存入 LocalStorage)
+    delete window.csvOccupiedSeats[window.selectedCell.seatId];
+    
     closeSeatModal();
     renderGridMap();
     calculateMapStatistics();
 
-    // 通知 Apps Script
-    fetch(`${window.APPS_SCRIPT_URL}?action=cancel&seatId=${encodeURIComponent(window.selectedCell.seatId)}&minecraftId=${encodeURIComponent(inputMcId)}`).catch(() => { });
+    const encryptedMcId = encryptUsername(inputMcId);
+
+    try {
+        // 發送 API 釋放座位
+        await fetch(`${window.APPS_SCRIPT_URL}?action=cancel&seatId=${encodeURIComponent(window.selectedCell.seatId)}&minecraftId=${encodeURIComponent(encryptedMcId)}`, {
+            method: 'GET',
+            mode: 'no-cors'
+        });
+        
+        showToast(`🧹 座位 ${window.selectedCell.seatId} 已恢復空閒。`);
+        
+        // 延遲 1.5 秒重新自雲端獲取最新 CSV，確保與 Google Sheets 後端一致
+        setTimeout(() => {
+            loadMapData();
+        }, 1500);
+    } catch (e) {
+        console.error("雲端釋放座位失敗:", e);
+        showToast("⚠️ 雲端釋放連線失敗", "error");
+    }
 }
 
 // 複製自習室傳送座標
 function copyMinecraftAction(type) {
-    if (!window.selectedCell) return;
-    const { x, y, z } = window.selectedCell;
+    if (!selectedCell) return;
+    const { x, y, z } = selectedCell;
     const textToCopy = type === 'tp' ? `/tp @s ${x} ${y} ${z}` : `${x} ${y} ${z}`;
     navigator.clipboard.writeText(textToCopy).then(() => {
         showToast(`📋 已複製：${textToCopy}`);
