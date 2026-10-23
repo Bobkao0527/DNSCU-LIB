@@ -1,8 +1,9 @@
 // ==========================================
-// 核心安全加解密模組 (Cryptography Engine - 決定性加密優化版)
+// 核心安全代碼假名化模組 (Pseudonymization Engine - Google Sheets 索引用)
+// 注意：本密鑰僅作為試算表唯讀比對之固定鹽值 (Deterministic Salt)，
+// 不具備身分授權效力；實際身分鑑權 100% 依賴 SSO 驗證伺服器 (window.SSO_VERIFY_API)
 // ==========================================
 
-// 預設密鑰 (長度必須為 32 字元以符合 AES-256 規格)
 const SECRET_KEY_STR = "nscu_lib_secret_key_2026_dolphin";
 
 /**

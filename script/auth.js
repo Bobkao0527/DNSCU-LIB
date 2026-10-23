@@ -7,7 +7,7 @@ async function handleSSOAuth() {
     let token = null;
     const hash = window.location.hash;
 
-    // 1. 偵測網址列 Hash 是否有 Token 跳回
+    // 1. 偵測網址列 Hash 是否有 Token 跳回 (向後相容)
     if (hash && hash.startsWith('#token=')) {
         token = hash.split('#token=')[1];
         localStorage.setItem('mc_auth_token', token);
@@ -22,32 +22,32 @@ async function handleSSOAuth() {
         token = localStorage.getItem('mc_auth_token');
     }
 
-    if (!token) {
-        setGuestMode();
-        return;
-    }
-
-    // 3. 向驗證伺服器確認 token 效期
+    // 3. 向驗證伺服器確認 token 效期 (支援 HttpOnly Cookie 與 Bearer Token)
     try {
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(window.SSO_VERIFY_API, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers,
+            credentials: 'include'
         });
 
         if (response.ok) {
             const data = await response.json();
-            if (data.valid) {
+            if (data && data.valid) {
                 window.currentUser = {
                     username: data.username, // 這裡自驗證 API 拿回的仍是明文玩家 ID
                     expiresAt: data.expiresAt,
-                    token: token
+                    token: token || 'cookie-session'
                 };
                 
                 // 動態對接 Google Sheet 使用者資料庫進行隨機證號與借閱清單同步
                 await checkAndSyncUser(data.username);
                 setLoginMode(window.currentUser);
+                return;
             } else {
                 console.warn("SSO Token 已過期或不合法。");
                 logoutSilently();
